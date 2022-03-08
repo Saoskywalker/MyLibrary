@@ -20,7 +20,7 @@ struct wav_
 };
 static struct wav_ wav;
 
-static audio_pcm_dev wanted_spec;
+static audio_pcm_dev_type wanted_spec;
 
 //输入路径
 int _WAV_Play(char *path)
