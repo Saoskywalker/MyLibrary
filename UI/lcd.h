@@ -99,7 +99,7 @@ typedef struct
 	u32 totalPixels; /* 总像素 */
 } _lcd_dev;
 
-extern render_dev *render_front, *render_back;
+extern render_dev_type *render_front, *render_back;
 extern framebuffer_dev framebuffer_var_info; //屏幕信息
 
 //LCD参数

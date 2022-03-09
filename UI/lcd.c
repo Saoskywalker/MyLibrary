@@ -658,7 +658,7 @@ void LCD_Display_Dir(u8 dir)
 //初始化lcd
 //该初始化函数可以初始化各种ILI93XX液晶,但是其他函数是基于ILI9320的!!!
 //在其他型号的驱动芯片上没有测试!
-render_dev *render_front = NULL, *render_back = NULL;
+render_dev_type *render_front = NULL, *render_back = NULL;
 framebuffer_dev framebuffer_var_info; //屏幕信息
 void LCD_Init(void)
 {
