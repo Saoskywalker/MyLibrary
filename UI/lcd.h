@@ -100,7 +100,7 @@ typedef struct
 } _lcd_dev;
 
 extern render_dev_type *render_front, *render_back;
-extern framebuffer_dev framebuffer_var_info; //屏幕信息
+extern framebuffer_dev_type framebuffer_var_info; //屏幕信息
 
 //LCD参数
 extern _lcd_dev lcddev; //管理LCD重要参数
