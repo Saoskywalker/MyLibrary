@@ -2,9 +2,7 @@
 #include "lodepng.h"
 #include "MTF_io.h"
 #include <malloc.h>
-#include <dma.h>
 #include "bmp.h"
-#include "sys_defe.h"
 #include "delay.h"
 #include "file_type.h"
 

@@ -102,7 +102,7 @@ void LCD_WR_DATA(u16 data)
 //返回值:读到的值
 u16 LCD_RD_DATA(void)
 {
-	vu16 ram;			//防止被优化
+	uint16_t ram;			//防止被优化
 	ram=LCD->LCD_RAM;	
 	return ram;	 
 }					   
