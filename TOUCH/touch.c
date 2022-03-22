@@ -15,7 +15,7 @@
 #define touch_debug(...)
 
 static u8 TP_Init(void);
-static unsigned char None_Scan(unsigned char tp)
+static uint8_t None_Scan(int *x, int *y, uint8_t target_num, uint8_t *result_num)
 {
     return 0;
 }

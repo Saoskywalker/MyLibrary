@@ -14,10 +14,10 @@
 typedef struct 
 {
 	u8 (*init)(void);			//初始化触摸屏控制器
-	u8 (*scan)(u8);				//扫描触摸屏.0,屏幕扫描;1,物理坐标;	 
+	uint8_t (*scan)(int *x, int *y, uint8_t target_num, uint8_t *result_num); //获取触摸坐标, x, y: 坐标数组; target: 获取坐标数量; result: 获取结果数量 
 	void (*adjust)(void);		//触摸屏校准 
-	u16 x[CT_MAX_TOUCH]; 		//当前坐标
-	u16 y[CT_MAX_TOUCH];		//电容屏有最多5组坐标,电阻屏则用x[0],y[0]代表:此次扫描时,触屏的坐标,用
+	int x[CT_MAX_TOUCH]; 		//当前坐标
+	int y[CT_MAX_TOUCH];		//电容屏有最多5组坐标,电阻屏则用x[0],y[0]代表:此次扫描时,触屏的坐标,用
 								//x[4],y[4]存储第一次按下时的坐标. 
 	u8  sta;					//笔的状态 
 								//b7:按下1/松开0; 
