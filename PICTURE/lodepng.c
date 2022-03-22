@@ -29,7 +29,6 @@ Rename this file to lodepng.cpp to use it for C++, or to lodepng.c to use it for
 */
 
 #include "lodepng.h"
-#include "ff.h"
 //#include "limits.h" /* LONG_MAX define */
 #include <MTF_io.h> /* file handling */
 #include <malloc.h> /* allocations */

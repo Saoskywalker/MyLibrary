@@ -19,7 +19,7 @@
 
 #include "lcd.h"
 #include "malloc.h"
-#include "ff.h"
+// #include "ff.h"
 #include "bmp.h"
 // #include "tjpgd.h"
 #include "gif.h"

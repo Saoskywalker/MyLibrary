@@ -73,7 +73,7 @@ u8 bmpreadbuf[BMP_DBUF_SIZE];
 u8 stdbmp_decode(const u8 *filename)
 {
 	mFILE *f_bmp = NULL;
-	UINT fbr = 0;
+	size_t fbr = 0;
 	u16 count;
 	u8 rgb, color_byte;
 	u16 x, y;
@@ -87,7 +87,7 @@ u8 stdbmp_decode(const u8 *filename)
 	u8 res;
 
 	u8 *databuf = NULL;				  //数据读取存放地址
-	UINT readlen = BMP_DBUF_SIZE; //一次从SD卡读取的字节数长度
+	size_t readlen = BMP_DBUF_SIZE; //一次从SD卡读取的字节数长度
 
 	u8 *bmpbuf = NULL;			  //数据解码地址
 	u8 biCompression = 0; //记录压缩方式
@@ -283,7 +283,7 @@ u8 stdbmp_decode(const u8 *filename)
 u8 minibmp_decode(u8 *filename, u16 x, u16 y, u16 width, u16 height, u16 acolor, u8 mode) //尺寸小于240*320的bmp图片解码.
 {
 	mFILE *f_bmp = NULL;
-	UINT fbr = 0;
+	size_t fbr = 0;
 	u8 color_byte;
 	u16 tx, ty, color;
 	//tx,ty的实际坐标
@@ -466,7 +466,7 @@ u8 minibmp_decode(u8 *filename, u16 x, u16 y, u16 width, u16 height, u16 acolor,
 u8 bmp_encode(u8 *filename, u16 x, u16 y, u16 width, u16 height)
 {
 	mFILE *f_bmp = NULL;
-	UINT fbr = 0;
+	size_t fbr = 0;
 	u16 bmpheadsize;  //bmp头大小
 	BITMAP_INFO hbmp; //bmp头
 	u8 res = 0;
@@ -577,7 +577,7 @@ u8 lodebmp_decode(unsigned char **out, unsigned *w,
 				  unsigned *h, const char *filename)
 {
 	mFILE *f_bmp = NULL;
-	UINT fbr = 0;
+	size_t fbr = 0;
 	u16 count = 0;
 	u8 rgb, color_byte;
 	u16 x, y;
@@ -587,7 +587,7 @@ u8 lodebmp_decode(unsigned char **out, unsigned *w,
 	u8 res;
 
 	u8 *databuf = NULL;				  //数据读取存放地址
-	UINT readlen = BMP_DBUF_SIZE; //一次从SD卡读取的字节数长度
+	size_t readlen = BMP_DBUF_SIZE; //一次从SD卡读取的字节数长度
 
 	u8 *bmpbuf = NULL;			  //数据解码地址
 	u8 biCompression = 0; //记录压缩方式
@@ -841,18 +841,18 @@ u8 lodebmp_decode(unsigned char **out, unsigned *w,
 u8 lodebmp_decode_cut(unsigned char **out, const char *filename, u16 x1, u16 y1, u16 x2, u16 y2)
 {
 	mFILE *f_bmp = NULL;
-	UINT fbr = 0;
+	size_t fbr = 0;
 	u16 count = 0;
 	u8 rgb = 0, color_byte = 0;
 	u16 x = 0, y = 0, w = 0, h = 0, yTemp = 0;
 	ColorClass color = 0;
 	ColorClass *data = NULL;
 	u8 res = 0;
-	// UINT ppp = 0;
+	// size_t ppp = 0;
 	u8 *iioo = NULL;
 
 	u8 *databuf = NULL;				  //数据读取存放地址
-	UINT readlen = BMP_DBUF_SIZE; //一次从SD卡读取的字节数长度
+	size_t readlen = BMP_DBUF_SIZE; //一次从SD卡读取的字节数长度
 
 	u8 *bmpbuf = NULL;			  //数据解码地址
 	u8 biCompression = 0; //记录压缩方式

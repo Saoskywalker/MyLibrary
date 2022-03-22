@@ -1,6 +1,9 @@
 #ifndef __GIF_H__
 #define __GIF_H__
+
 #include "types_plus.h"    
+#include "MTF_io.h"
+
 //////////////////////////////////////////////////////////////////////////////////	 
 //本程序只供学习使用，未经作者许可，不得用于其它任何用途
 //ALIENTEK战舰STM32开发板V3
@@ -87,20 +90,20 @@ typedef struct  __attribute__((packed))
 
 extern u8 gifdecoding;	//GIF正在解码标记.
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-u8 gif_check_head(FIL *file);														    //检测GIF头
+u8 gif_check_head(mFILE *file);														    //检测GIF头
 u16 gif_getrgb565(u8 *ctb);																//将RGB888转为RGB565
-u8 gif_readcolortbl(FIL *file,gif89a * gif,u16 num);									//读取颜色表
-u8 gif_getinfo(FIL *file,gif89a * gif);												    //得到逻辑屏幕描述,图像尺寸等
+u8 gif_readcolortbl(mFILE *file,gif89a * gif,u16 num);									//读取颜色表
+u8 gif_getinfo(mFILE *file,gif89a * gif);												    //得到逻辑屏幕描述,图像尺寸等
 void gif_savegctbl(gif89a* gif);														//保存全局颜色表
 void gif_recovergctbl(gif89a* gif);														//恢复全局颜色表
 void gif_initlzw(gif89a* gif,u8 codesize);												//初始化LZW相关参数
-u16 gif_getdatablock(FIL *gfile,u8 *buf,u16 maxnum);								   	//读取一个数据块
-u8 gif_readextension(FIL *gfile,gif89a* gif, int *pTransIndex,u8 *pDisposal);		   	//读取扩展部分
-int gif_getnextcode(FIL *gfile,gif89a* gif);										   	//从LZW缓存中得到下一个LZW码,每个码包含12位
-int gif_getnextbyte(FIL *gfile,gif89a* gif);											//得到LZW的下一个码
-u8 gif_dispimage(FIL *gfile,gif89a* gif,u16 x0,u16 y0,int Transparency, u8 Disposal);	//显示图片
+u16 gif_getdatablock(mFILE *gfile,u8 *buf,u16 maxnum);								   	//读取一个数据块
+u8 gif_readextension(mFILE *gfile,gif89a* gif, int *pTransIndex,u8 *pDisposal);		   	//读取扩展部分
+int gif_getnextcode(mFILE *gfile,gif89a* gif);										   	//从LZW缓存中得到下一个LZW码,每个码包含12位
+int gif_getnextbyte(mFILE *gfile,gif89a* gif);											//得到LZW的下一个码
+u8 gif_dispimage(mFILE *gfile,gif89a* gif,u16 x0,u16 y0,int Transparency, u8 Disposal);	//显示图片
 void gif_clear2bkcolor(u16 x,u16 y,gif89a* gif,ImageScreenDescriptor pimge);		   	//恢复成背景色
-u8 gif_drawimage(FIL *gfile,gif89a* gif,u16 x0,u16 y0);									//画GIF图像的一帧
+u8 gif_drawimage(mFILE *gfile,gif89a* gif,u16 x0,u16 y0);									//画GIF图像的一帧
 
 u8 gif_decode2(const u8 *filename,u16 x,u16 y,u16 width,u16 height);//在指定区域解码一个GIF文件.
 void gif_quit(void);									//退出当前解码.

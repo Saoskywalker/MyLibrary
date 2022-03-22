@@ -1,6 +1,5 @@
 #include "piclib.h"
 #include "gif.h"	 
-#include "ff.h"	
 #include "delay.h"	 
 #include <string.h>   
 #include "MTF_io.h"

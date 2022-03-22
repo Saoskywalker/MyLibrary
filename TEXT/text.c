@@ -3,7 +3,7 @@
 #include "UI_engine.h"
 #include "text.h"
 #include "MTF_io.h"
-#include "file_operate.h" 
+#include "file_operate_hal.h" 
 #include "Sagittarius_global.h"
 
 static mFILE *ffont8, *ffont12, *ffont16, *ffont24, *ffont32, *ffontASCII8, *ffontASCII32;
