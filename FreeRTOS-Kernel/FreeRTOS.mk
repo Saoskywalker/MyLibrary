@@ -5,7 +5,7 @@ FreeRTOS_path ?= lib/
 DEFINES	+=  
 
 #include path
-INCDIRS		+= 	-I$(FreeRTOS_path)FreeRTOS-Kernel/portable/GCC/ARM926ejs \
+INCDIRS		+= 	-I$(FreeRTOS_path)FreeRTOS-Kernel/portable/MSVC-MingW \
 				-I$(FreeRTOS_path)FreeRTOS-Kernel/include \
 				-I$(FreeRTOS_path)FreeRTOS-Kernel/user_define \
 				# -I$(FreeRTOS_path)FreeRTOS-Kernel/user_define/Supporting_Functions \
@@ -18,7 +18,7 @@ LIBS +=
 
 #c source path
 SRCDIRS_C += 	$(FreeRTOS_path)FreeRTOS-Kernel \
-				$(FreeRTOS_path)FreeRTOS-Kernel/portable/GCC/ARM926ejs \
+				$(FreeRTOS_path)FreeRTOS-Kernel/portable/MSVC-MingW \
 				$(FreeRTOS_path)FreeRTOS-Kernel/portable/MemMang \
 				# $(FreeRTOS_path)FreeRTOS-Kernel/user_define/Supporting_Functions \
 
