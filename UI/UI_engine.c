@@ -34,7 +34,6 @@ u8 UI_init(void)
 	LCD_rectBackup.pixelDatas = MTF_fb_get_dis_mem(render_back);
 	if(LCD_rectBackup.pixelDatas==NULL)
 		return 1; 
-	UI_LCDBackupRenew();
 	
 	LCD_disAdapt.width = lcddev.width; //自适应功能部分
 	LCD_disAdapt.height = lcddev.height; 
@@ -45,6 +44,7 @@ u8 UI_init(void)
 	LCD_disAdapt.crossWay = 0;
 	LCD_disAdapt.pixelDatas = MTF_fb_get_dis_mem(render_front);
 
+	UI_LCDBackupRenew();
 	control_table_init();
 	return 0;
 }
