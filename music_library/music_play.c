@@ -942,15 +942,15 @@ void AUDIO_Demo(void)
 {
     char *path[13] =
         {
-            "0:/so_shi_te_ni_ma.mp3",
-            "0:/kiss_me_goodbye.wav",
-            "0:/a1.wav",
-            "0:/a2.mp3",
-            "0:/m1.wav",
-            "0:/m2.mp3",
-            "0:/m3.mp3",
-            "0:/m4.mp3",
-            0};
+            "./so_shi_te_ni_ma.mp3",
+            "./kiss_me_goodbye.wav",
+            "./a1.wav",
+            "./a2.mp3",
+            "./m1.wav",
+            "./m2.mp3",
+            "./m3.mp3",
+            "./m4.mp3",
+            NULL};
 
     int s = 0;
 

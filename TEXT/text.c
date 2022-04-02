@@ -65,9 +65,9 @@ static void FontInit(u8 size)
 			}
 			else
 			{ //先复制,,后再次检查字库
-				// res = mf_copy("0:/SYSTEM/FONT/GBK12.FON", "1:/GBK12.FON", 1);
+				// res = mf_copy("./SYSTEM/FONT/GBK12.FON", "./GBK12.FON", 1);
 				// if(res==0)
-				// 	ffont12 = MTF_open("1:/GBK12.FON", "rb");
+				// 	ffont12 = MTF_open("./GBK12.FON", "rb");
 				// if(ffont12!=NULL)
 				// 	FontStute |= 1<<0;
 			}		
@@ -82,9 +82,9 @@ static void FontInit(u8 size)
 			}
 			else
 			{ //先复制,,后再次检查字库
-				// res = mf_copy("0:/SYSTEM/FONT/GBK16.FON", "1:/GBK16.FON", 1);
+				// res = mf_copy("./SYSTEM/FONT/GBK16.FON", "./GBK16.FON", 1);
 				// if(res==0)
-				// 	ffont16 = MTF_open("1:/GBK16.FON", "rb");
+				// 	ffont16 = MTF_open("./GBK16.FON", "rb");
 				// if(ffont16!=NULL)
 				// 	FontStute |= 1<<1;
 			}	
@@ -99,9 +99,9 @@ static void FontInit(u8 size)
 			}
 			else
 			{ //先复制,,后再次检查字库
-				// res = mf_copy("0:/SYSTEM/FONT/GBK24.FON", "1:/GBK24.FON", 1);
+				// res = mf_copy("./SYSTEM/FONT/GBK24.FON", "./GBK24.FON", 1);
 				// if(res==0)
-				// 	ffont24 = MTF_open("1:/GBK24.FON", "rb");
+				// 	ffont24 = MTF_open("./GBK24.FON", "rb");
 				// if(ffont24!=NULL)
 				// 	FontStute |= 1<<2;
 			}	
@@ -116,7 +116,7 @@ static void FontInit(u8 size)
 			}
 			else
 			{ //先复制,,后再次检查字库
-				// res = mf_copy("0:/SYSTEM/FONT/GBK32.FON", "1:/GBK32.FON", 1);
+				// res = mf_copy("./SYSTEM/FONT/GBK32.FON", "./GBK32.FON", 1);
 				// if(res==0)
 				// 	ffont32 = MTF_open("1:/GBK32.FON", "rb");
 				// if(ffont32!=NULL)
