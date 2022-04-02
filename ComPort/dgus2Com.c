@@ -60,7 +60,7 @@ u8 DGUSII_Com_read(u8 *data, int *num)
             frameStart = 0;
             step = 0;
             frameCnt = 0;
-            printf("uart_reset\r\n");
+            // printf("uart_reset\r\n");
             MTF_UART_Reset(&uart_hmi);
             recInPrt = 0;
             recOutPrt = 0;
