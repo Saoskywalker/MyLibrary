@@ -587,6 +587,7 @@ u8 gif_decode2(const u8 *filename,u16 x,u16 y,u16 width,u16 height)
 //filename:带路径的gif文件名字
 //x,y显示坐标.
 //rect: 返回的矩形信息(长宽)
+#include "system_port.h"
 u8 gif_decode(const u8 *filename, u16 x, u16 y, RectInfo *rect)
 {
 	u16 width = 0, height = 0;
@@ -634,6 +635,11 @@ u8 gif_decode(const u8 *filename, u16 x, u16 y, RectInfo *rect)
 			gifdecoding = 1;
 			while (gifdecoding && res == 0) //解码循环
 			{
+				if (system_process_weak() == 1) //SDL专用, 要定时获取事件, 不然无响应, 停机
+				{
+					break;
+				}
+
 				res = gif_drawimage(gfile, mygif89a, x, y); //显示一张图片
 				if (mygif89a->gifISD.flag & 0x80)
 					gif_recovergctbl(mygif89a); //恢复全局颜色表
@@ -921,7 +927,7 @@ unsigned char gif_decode_loop(void)
 	u8 *gifdecoding_loop; //标记解码运行中
 
 	u8 state;
-	u8 loop_cnt;
+	u8 *loop_cnt;
 	u16 x;
 	u16 y;
 
@@ -945,7 +951,7 @@ unsigned char gif_decode_loop(void)
 			gifdecoding_loop = &(gif_decode_table[id]->temp->gifdecoding_loop); //标记解码运行中
 
 			state = gif_decode_table[id]->state;
-			loop_cnt = gif_decode_table[id]->loop_cnt;
+			loop_cnt = &gif_decode_table[id]->loop_cnt;
 			x = gif_decode_table[id]->x;
 			y = gif_decode_table[id]->y;
 
@@ -974,16 +980,17 @@ unsigned char gif_decode_loop(void)
 			}
 			else //开始解码
 			{
-				if (loop_cnt) //有没循环次数
+				if (*loop_cnt) //有没循环次数
 				{
-					if (loop_cnt != 255) //255为无限循环
-						loop_cnt -= 1;
+					if (*loop_cnt != 255) //255为无限循环
+						*loop_cnt -= 1;
 				}
 				else
 				{
 					return 0;
 				}
 
+				MTF_seek(gfile, 0, SEEK_SET);
 				if (gif_check_head(gfile))
 					res = PIC_FORMAT_ERR;
 				if (gif_getinfo(gfile, mygif89a))
