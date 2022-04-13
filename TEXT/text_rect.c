@@ -130,7 +130,9 @@ void UI_showStr(RectInfo *pic, u8 *str, u8 size, u8 mode)
 	pic->pixelByte = render_front->bytes_per_pixel;
 	pic->pixelDatas = malloc(pic->pixelByte*pic->totalPixels);
     if(pic->pixelDatas==NULL)
+	{
         return;
+	}
 	// for(u16 k = 0; k<pic->totalPixels; k++)
 	// 	((ColorClass *)pic->pixelDatas)[k] = 0X00FFFFFF; //全透明白色预填充
 

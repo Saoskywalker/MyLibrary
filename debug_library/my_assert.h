@@ -2,6 +2,7 @@
 #define _MY_ASSERT_H
 
 // #define _USE_ASSERT    1
+#include "MTF_io.h"
 
 /* Exported macro -------------------------------*/
 #ifdef  _USE_ASSERT
@@ -20,7 +21,6 @@
 #endif /* _USE_ASSERT */
 
 #ifdef _USER_DEBUG
-  #include "stdio.h"
   #define my_debug(...) printf(__VA_ARGS__)
 #else
   #define my_debug(...)
