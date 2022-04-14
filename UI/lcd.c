@@ -658,6 +658,7 @@ void LCD_Display_Dir(u8 dir)
 //初始化lcd
 //该初始化函数可以初始化各种ILI93XX液晶,但是其他函数是基于ILI9320的!!!
 //在其他型号的驱动芯片上没有测试!
+#include "LCD_parameter.h"
 render_dev_type *render_front = NULL, *render_back = NULL;
 framebuffer_dev_type framebuffer_var_info; //屏幕信息
 void LCD_Init(void)
@@ -665,7 +666,34 @@ void LCD_Init(void)
 	lcddev.id = 0XFFAA;
 	// printf(" LCD ID:%x\r\n",lcddev.id); //打印LCD ID
 
+	/*******framebuffer init***************/
+	//获取液晶参数
+    framebuffer_var_info.xres = LCD_X_PIXEL;
+    framebuffer_var_info.yres = LCD_Y_PIXEL;
+    framebuffer_var_info.xres_virtual = framebuffer_var_info.xres;
+    framebuffer_var_info.yres_virtual = framebuffer_var_info.yres;
+    framebuffer_var_info.sync = LCD_DE_HV_MODE;               // 0: DE_HV 1:DE 2:HV
+    framebuffer_var_info.pixclock = LCD_CLK;                  // pixel_clock_hz
+    framebuffer_var_info.left_margin = LCD_HFP;               // h_front_porch
+    framebuffer_var_info.right_margin = LCD_HBP;              // h_back_porch
+    framebuffer_var_info.hsync_len = LCD_HSL;                 // h_sync_len
+    framebuffer_var_info.upper_margin = LCD_VFP;              // v_front_porch
+    framebuffer_var_info.lower_margin = LCD_VBP;              // v_back_porch
+    framebuffer_var_info.vsync_len = LCD_VSL;                 // v_sync_len
+    framebuffer_var_info.width = 216;                         //液晶尺寸(单位:mm)
+    framebuffer_var_info.height = 135;
+
+    //像素信息
+    framebuffer_var_info.bits_per_pixel = 32;
+
+    //扩展应用
+    framebuffer_var_info.scale_flag = 0; //不开启缩放
+    framebuffer_var_info.tv_input_flag = 0; //不使用cvbs输入
+    framebuffer_var_info.write_back_addr = NULL; //回写显存地址
+
 	MTF_fb_init(&framebuffer_var_info);
+
+	/**********render create****************/
 	render_front = MTF_fb_render_create(&framebuffer_var_info, framebuffer_var_info.xres, framebuffer_var_info.yres);
 	render_back = MTF_fb_render_create(&framebuffer_var_info, framebuffer_var_info.xres, framebuffer_var_info.yres);
 

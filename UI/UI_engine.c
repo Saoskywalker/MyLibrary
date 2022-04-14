@@ -121,6 +121,12 @@ u8 UI_disAdapt(int width, int height)
 {
 	MTF_fb_destroy(render_front); //去掉旧
 	MTF_fb_destroy(render_back);
+
+	//重建FB, 以完成缩放(改变实际显示分辨率), 如不重建,则直接使用系统缩放, 则不用重建(不改变实际显示分辨率)
+	framebuffer_var_info.xres = width;
+	framebuffer_var_info.yres = height;
+	MTF_fb_reset(&framebuffer_var_info);
+
 	render_front = MTF_fb_render_create(&framebuffer_var_info, width, height); //再按新参数重建
 	render_back = MTF_fb_render_create(&framebuffer_var_info, width, height);
 	if(render_front==NULL||render_back==NULL)
@@ -190,6 +196,9 @@ u8 UI_disAdapt(int width, int height)
 	lcddev.totalPixels = LCD_disAdapt.totalPixels;
 	LCD_Display_Dir(lcddev.dir); //设置读写显存函数
 	MTF_fb_scale(&framebuffer_var_info, 1, LCD_disAdapt.pixelDatas);
+	LCD_Clear(BLACK); //清屏
+	LCD_Exec(); //更新显示
+	UI_LCDBackupRenew();
 	/*******************************/
 	return 0; //成功
 } 
