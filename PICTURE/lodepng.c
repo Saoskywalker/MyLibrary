@@ -4540,9 +4540,9 @@ unsigned lodepng_decode(unsigned char** out, unsigned* w, unsigned* h,
     size_t count = (*w) * (*h); //note: swap R B, I add this
     for (size_t i = 0; i < count; i++)
     {
-      ((size_t *)*out)[i] = ((((size_t *)*out)[i] & 0X00FF0000) >> 16) + \
-                           (((size_t *)*out)[i] & 0XFF00FF00) + \
-                           ((((size_t *)*out)[i] & 0X000000FF) << 16);
+      ((uint32_t *)*out)[i] = ((((uint32_t *)*out)[i] & 0X00FF0000) >> 16) + \
+                           (((uint32_t *)*out)[i] & 0XFF00FF00) + \
+                           ((((uint32_t *)*out)[i] & 0X000000FF) << 16);
     }
   } else {
     /*color conversion needed; sort of copy of the data*/
