@@ -158,10 +158,10 @@ u8 ai_load_picfile(const u8 *filename,u16 x,u16 y,u16 width,u16 height,u8 fast)
 			res=stdbmp_decode(filename); 				//解码bmp	  	  
 			break;
 		case T_JPG:
-			// res=jpg_decode(filename,fast);				//解码JPG/JPEG	
+			res=jpg_test(filename,fast);				//解码JPG/JPEG	
 			break; 
 		case T_JPEG:
-			// res=jpg_decode(filename,fast);				//解码JPG/JPEG	  	  
+			res=jpg_test(filename,fast);				//解码JPG/JPEG	  	  
 			break;
 		case T_GIF:
 			res=gif_decode2(filename,x,y,width,height);	//解码gif  	  

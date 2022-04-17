@@ -80,7 +80,9 @@ struct JDEC {
 /* TJpgDec API functions */
 JRESULT jd_prepare (JDEC*, UINT(*)(JDEC*,BYTE*,UINT), void*, UINT, void*);
 JRESULT jd_decomp (JDEC*, UINT(*)(JDEC*,void*,JRECT*), BYTE);
-u8 jpg_decode(const u8 *filename,u8 fast);
+u8 jpg_test(const u8 *filename,u8 fast);
+u8 lodejpg_decode(unsigned char **out, unsigned *w,
+				  unsigned *h, const char *filename);
 
 #ifdef __cplusplus
 }

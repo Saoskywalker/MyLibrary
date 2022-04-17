@@ -1037,13 +1037,13 @@ UINT jpeg_in_func(JDEC *jd, BYTE *buf, UINT num)
 //返回值:0,输出成功;1,输出失败/结束输出
 UINT jpeg_out_func_fill(JDEC* jd,void* rgbbuf,JRECT* rect) 
 { 
-	u16 *pencolor=(u16*)rgbbuf;
+	ColorClass *pencolor=(ColorClass*)rgbbuf;
 	u16 width=rect->right-rect->left+1;		//填充的宽度
 	u16 height=rect->bottom-rect->top+1;	//填充的高度 
 	pic_phy.fillcolor(rect->left+picinfo.S_XOFF,rect->top+picinfo.S_YOFF,width,height,pencolor);//颜色填充 
     return 0;    //返回0,使得解码工作继续执行 
 } 
-//采用画点的方式进行图片解码显示
+//采用画点的方式进行图片解码显示(直接输出至屏幕)
 //jd:储存待解码的对象信息的结构体
 //rgbbuf:指向等待输出的RGB位图数据的指针
 //rect:等待输出的矩形图像的参数
@@ -1084,12 +1084,44 @@ UINT jpeg_out_func_point(JDEC* jd,void* rgbbuf,JRECT* rect)
 		}
 	}
     return 0;    //返回0,使得解码工作继续执行 
-} 
-//解码jpeg/jpg文件s
+}
+//用画点法, 将数据保存至解码后RAW空间
+//jd:储存待解码的对象信息的结构体
+//rgbbuf:指向等待输出的RGB位图数据的指针
+//rect:等待输出的矩形图像的参数
+//返回值:0,输出成功;1,输出失败/结束输出
+static ColorClass *raw_buffer = NULL;
+static UINT jpeg_out_func_point_raw(JDEC *jd, void *rgbbuf, JRECT *rect)
+{
+	ColorClass tempColor = 0;
+	u16 i, j;
+	u16 realx = rect->left, realy = 0;
+	u16 *pencolor = rgbbuf;
+	u16 width = rect->right - rect->left + 1;  //图片的宽度
+	u16 height = rect->bottom - rect->top + 1; //图片的高度
+
+	for (i = 0; i < height; i++) // y坐标
+	{
+		realy = rect->top + i;		//实际Y坐标
+		for (j = 0; j < width; j++) // x坐标
+		{
+			realx = rect->left + j; //实际X坐标
+			// RGB565->RGB888
+			tempColor = (*pencolor & 0X0000001F) << 3;	// B
+			tempColor += (*pencolor & 0X000007E0) << 5; // G
+			tempColor += (*pencolor & 0X0000F800) << 8; // R
+			((ColorClass *)raw_buffer)[realx + realy * jpeg_dev->width] = tempColor;
+			pencolor++;
+		}
+	}
+	return 0; //返回0,使得解码工作继续执行
+}
+
+//测试解码jpeg/jpg文件
 //filename:jpeg/jpg路径+文件名
 //fast:使能小图片(图片尺寸小于等于液晶分辨率)快速解码,0,不使能;1,使能.
 //返回值:0,解码成功;其他,解码失败.
-u8 jpg_decode(const u8 *filename,u8 fast)
+u8 jpg_test(const u8 *filename,u8 fast)
 {  
 	u8 res=0;	//返回值 
 	u8 scale;	//图像输出比例 0,1/2,1/4,1/8  
@@ -1141,48 +1173,54 @@ u8 jpg_decode(const u8 *filename,u8 fast)
 	return res;	 
 }
 
+//解码jpeg/jpg文件
+//filename:jpeg/jpg路径+文件名
+//输出RAW数据, 和分辨率
+//返回值:0,解码成功;其他,解码失败.
+u8 lodejpg_decode(unsigned char **out, unsigned *w,
+				  unsigned *h, const char *filename)
+{
+	u8 res = 0; //返回值
+	UINT (*outfun)
+	(JDEC *, void *, JRECT *);
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+#if JPEG_USE_MALLOC == 1 //使用malloc
+	res = jpeg_mallocall();
+#endif
+	if (res == 0)
+	{
+		//得到JPEG/JPG图片的开始信息
+		f_jpeg = MTF_open((const char *)filename, "rb"); //打开文件
+		if (f_jpeg != NULL)								 //打开文件成功
+		{
+			//执行解码的准备工作，调用TjpgDec模块的jd_prepare函数
+			res = jd_prepare(jpeg_dev, jpeg_in_func, jpg_buffer, JPEG_WBUF_SIZE, f_jpeg);
+			outfun = jpeg_out_func_point_raw; //采用画点的方式, 将数据存放在RAW空间
+			if (res == JDR_OK)				  //准备解码成功
+			{
+				*w = jpeg_dev->width;
+				*h = jpeg_dev->height;
+				raw_buffer = (ColorClass *)pic_memalloc(jpeg_dev->width * jpeg_dev->height * sizeof(ColorClass));
+				if (raw_buffer == NULL)
+				{
+					res = PIC_MEM_ERR;
+				}
+				else
+				{
+					//执行解码工作，调用TjpgDec模块的jd_decomp函数
+					res = jd_decomp(jpeg_dev, outfun, 0);
+				}
+			}
+		}
+		else
+		{
+			res = 4;
+		}
+		MTF_close(f_jpeg); //解码工作执行成功，返回0
+	}
+#if JPEG_USE_MALLOC == 1 //使用malloc
+	jpeg_freeall();		 //释放内存
+#endif
+	*out = (unsigned char *)raw_buffer;
+	return res;
+}

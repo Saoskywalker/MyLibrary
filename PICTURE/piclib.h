@@ -21,7 +21,7 @@
 #include "malloc.h"
 // #include "ff.h"
 #include "bmp.h"
-// #include "tjpgd.h"
+#include "tjpgd.h"
 #include "gif.h"
 #include "types_plus.h"
 

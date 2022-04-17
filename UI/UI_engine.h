@@ -103,6 +103,9 @@ unsigned char png_decode_cut(const char *filename, RectInfo *ptr,
 unsigned char bmp_decode(const char *filename, RectInfo *ptr);
 unsigned char bmp_decode_cut(const char *filename, RectInfo *ptr, 
 							u16 x1, u16 y1, u16 x2, u16 y2);
+unsigned char jpg_decode(const char *filename, RectInfo *ptr);
+unsigned char jpg_decode_cut(const char *filename, RectInfo *ptr, 
+							u16 x1, u16 y1, u16 x2, u16 y2);
 unsigned char UI_pic_cut(const char *filename, RectInfo *ptr,
 						 u16 x1, u16 y1, u16 x2, u16 y2);
 unsigned char UI_pic(const char *filename, RectInfo *ptr);

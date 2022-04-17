@@ -3,6 +3,7 @@
 #include "MTF_io.h"
 #include <malloc.h>
 #include "bmp.h"
+#include "tjpgd.h"
 #include "delay.h"
 #include "file_type.h"
 
@@ -947,6 +948,60 @@ unsigned char bmp_decode_cut(const char *filename, RectInfo *ptr,
 	return error;
 }
 
+unsigned char jpg_decode(const char *filename, RectInfo *ptr)
+{
+	unsigned char error = 0;
+	unsigned char *image;
+	unsigned width, height;
+  	unsigned int pixels = 0;
+	
+	error = lodejpg_decode(&image, &width, &height, filename);
+	if(error==0)
+	{
+		pixels = width*height;
+		ptr->height = height;
+		ptr->width = width;
+		ptr->totalPixels = pixels;
+		ptr->pixelDatas = image; //note: free it after use it
+	}
+	return error;
+}
+
+unsigned char jpg_decode_cut(const char *filename, RectInfo *ptr, 
+							u16 x1, u16 y1, u16 x2, u16 y2)
+{
+    RectInfo pic;
+    int x, y;
+
+    x = x1;
+    y = y1;
+    pic.pixelByte = 4;
+    pic.crossWay = 0;
+    pic.alpha = 255;
+    ptr->pixelByte = 4;
+    ptr->width = x2-x1+1;
+    ptr->height = y2-y1+1;
+    ptr->totalPixels = ptr->width*ptr->height;
+    ptr->pixelDatas = malloc(ptr->totalPixels*ptr->pixelByte);
+    // //printf("x: %d, y: %d, w: %d, h: %d\r\n", x, y, ptr->width, ptr->height);
+    if(ptr->pixelDatas==NULL)
+    {  
+        return 1;
+    }
+    if(jpg_decode(filename, &pic)==0) 
+    {
+        // printf("ptr->r\n");
+        UI_rectRegionCross(ptr, &pic, -x, -y); //cut
+        free(pic.pixelDatas);
+    }
+	else
+	{
+		free(ptr->pixelDatas);
+		return 2;
+	}
+	return 0;
+}
+
 unsigned char UI_pic_cut(const char *filename, RectInfo *ptr,
 						 u16 x1, u16 y1, u16 x2, u16 y2)
 {
@@ -957,6 +1012,8 @@ unsigned char UI_pic_cut(const char *filename, RectInfo *ptr,
 		res = bmp_decode_cut(filename, ptr, x1, y1, x2, y2); //解码bmp
 	else if(type==T_PNG)
 		res = png_decode_cut(filename, ptr, x1, y1, x2, y2); //解码PNG
+	else if(type==T_JPG)
+		res = jpg_decode_cut(filename, ptr, x1, y1, x2, y2); //解码jpg
 	else
 		res = 0X27; //非图片格式!!!
 	return res;
@@ -971,6 +1028,8 @@ unsigned char UI_pic(const char *filename, RectInfo *ptr)
 		res = bmp_decode(filename, ptr); //解码bmp
 	else if(type==T_PNG)
 		res = png_decode(filename, ptr); //解码PNG
+	else if(type==T_JPG)
+		res = jpg_decode(filename, ptr); //解码jpg
 	else
 		res = 0X27; //非图片格式!!!
 	return res;
