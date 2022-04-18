@@ -22,6 +22,21 @@ static struct wav_ wav;
 
 static audio_pcm_dev_type wanted_spec;
 
+//上锁, 避免多线程下冲突
+static uint8_t music_lock_flag = 0;
+static uint8_t music_lock(void)
+{
+	while(music_lock_flag);
+	music_lock_flag = 1;
+	return 0;
+}
+
+static uint8_t music_unlock(void)
+{
+	music_lock_flag = 0;
+	return 0;
+}
+
 //输入路径
 int _WAV_Play(char *path)
 {
@@ -223,7 +238,8 @@ int wav_init(char *path, int play_time)
     int res = 0;
     int r = 0;
     uint8_t buff[8192];
-
+    
+    music_lock();
     if (playMusicState) //强制停止
     {
         // while (MTF_audio_pcm_output_busy(&wanted_spec));
@@ -235,6 +251,7 @@ int wav_init(char *path, int play_time)
         MUSIC_DEBUG("file close\r\n");
         MTF_close(fpWav);
     }
+    music_unlock();
 
     MUSIC_DEBUG("WAV play\r\n");
 
@@ -339,8 +356,8 @@ int wav_init(char *path, int play_time)
                 MUSIC_DEBUG("play...\r\n");
                 WavBuffInx = 0;
                 _unit = 0;
-                play_exit = 0; //开始播放
                 audio_keep_time = play_time;
+                play_exit = 0; //开始播放
             }
             else
                 MUSIC_DEBUG("parameter error\r\n");
@@ -353,6 +370,7 @@ int wav_init(char *path, int play_time)
 
 void _WAV_Play2(void)
 {
+    music_lock();
     if (play_exit && playMusicState) //强制停止
     {
         // while (MTF_audio_pcm_output_busy(&wanted_spec));
@@ -409,6 +427,7 @@ void _WAV_Play2(void)
                     playMusicState = 0; //已停止播放处理
                     MUSIC_DEBUG("file close\r\n");
                     MTF_close(fpWav);
+                    music_unlock();
                     return;
                 }
             }
@@ -435,6 +454,7 @@ void _WAV_Play2(void)
             }
         }
     }
+    music_unlock();
 }
 
 /*****mp3解码******/
