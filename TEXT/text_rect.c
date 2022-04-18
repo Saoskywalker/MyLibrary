@@ -412,7 +412,7 @@ static void Get_Lattice(unsigned char *code, unsigned char *mat, u8 num, u8 size
 		strcat(path_temp, j);
 		strcat(path_temp, "_");
 		strcat(path_temp, k);
-		strcat(path_temp, ".FON");
+		strcat(path_temp, ".Dzk");
 		foffset = *code * csize; //得到字库中的字节偏移量
 	}
 	else
@@ -424,7 +424,7 @@ static void Get_Lattice(unsigned char *code, unsigned char *mat, u8 num, u8 size
 		strcat(path_temp, j);
 		strcat(path_temp, "_GBK");
 		strcat(path_temp, k);
-		strcat(path_temp, ".FON");
+		strcat(path_temp, ".Dzk");
 		qh = *code;
 		ql = *(++code);
 		if (qh < 0x81 || ql < 0x40 || ql == 0xff || qh == 0xff) //非 常用汉字

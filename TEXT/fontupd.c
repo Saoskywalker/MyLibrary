@@ -11,9 +11,9 @@
 _font_info ftinfo;
 
 //字库存放在磁盘中的路径
-u8 *const GBK24_PATH = "/SYSTEM/FONT/GBK24.FON"; //GBK24的存放位置
-u8 *const GBK16_PATH = "/SYSTEM/FONT/GBK16.FON"; //GBK16的存放位置
-u8 *const GBK12_PATH = "/SYSTEM/FONT/GBK12.FON"; //GBK12的存放位置
+u8 *const GBK24_PATH = "/SYSTEM/FONT/GBK24.Dzk"; //GBK24的存放位置
+u8 *const GBK16_PATH = "/SYSTEM/FONT/GBK16.Dzk"; //GBK16的存放位置
+u8 *const GBK12_PATH = "/SYSTEM/FONT/GBK12.Dzk"; //GBK12的存放位置
 
 //显示当前字体更新进度
 //x,y:坐标
@@ -183,7 +183,7 @@ u8 update_font(u16 x, u16 y, u8 size, u8 *src)
 		LCD_Exec();
 		strcpy((char *)pname, (char *)src); //copy src内容到pname
 		strcat((char *)pname, (char *)GBK12_PATH);
-		res = updata_fontx(x + 20 * size / 2, y, size, pname, 1); //更新GBK12.FON
+		res = updata_fontx(x + 20 * size / 2, y, size, pname, 1); //更新GBK12.Dzk
 		if (res)
 		{
 			free(pname);
@@ -194,7 +194,7 @@ u8 update_font(u16 x, u16 y, u8 size, u8 *src)
 		LCD_Exec();
 		strcpy((char *)pname, (char *)src); //copy src内容到pname
 		strcat((char *)pname, (char *)GBK16_PATH);
-		res = updata_fontx(x + 20 * size / 2, y, size, pname, 2); //更新GBK16.FON
+		res = updata_fontx(x + 20 * size / 2, y, size, pname, 2); //更新GBK16.Dzk
 		if (res)
 		{
 			free(pname);
@@ -205,7 +205,7 @@ u8 update_font(u16 x, u16 y, u8 size, u8 *src)
 		// LCD_Exec();
 		// strcpy((char *)pname, (char *)src); //copy src内容到pname
 		// strcat((char *)pname, (char *)GBK24_PATH);
-		// res = updata_fontx(x + 20 * size / 2, y, size, pname, 3); //更新GBK24.FON
+		// res = updata_fontx(x + 20 * size / 2, y, size, pname, 3); //更新GBK24.Dzk
 		// if (res)
 		// {
 		// 	free(pname);
