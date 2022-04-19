@@ -4,7 +4,7 @@
 
 #define MUSIC_DEBUG(...) //printf(__VA_ARGS__)
 
-static int play_exit = 0; //播放退出标志
+static int play_exit = 1; //播放退出标志
 static unsigned char playMusicState = 0;
 static unsigned char wav_buff[2][70000] __attribute__((aligned(4)));
 struct wav_
@@ -23,18 +23,25 @@ static struct wav_ wav;
 static audio_pcm_dev_type wanted_spec;
 
 //上锁, 避免多线程下冲突
-static uint8_t music_lock_flag = 0;
-static uint8_t music_lock(void)
+#include "system_port.h"
+static MTF_mutex *music_mutex = NULL;
+static char music_lock(void)
 {
-	while(music_lock_flag);
-	music_lock_flag = 1;
-	return 0;
+    if (music_mutex == NULL)
+    {
+        music_mutex = MTF_CreateMutex();
+    }
+    return (char)MTF_LockMutex(music_mutex);
 }
 
-static uint8_t music_unlock(void)
+static char music_try_lock(void)
 {
-	music_lock_flag = 0;
-	return 0;
+    return (char)MTF_TryLockMutex(music_mutex);
+}
+
+static char music_unlock(void)
+{
+	return (char)MTF_UnlockMutex(music_mutex);
 }
 
 //输入路径
@@ -370,21 +377,22 @@ int wav_init(char *path, int play_time)
 
 void _WAV_Play2(void)
 {
-    music_lock();
-    if (play_exit && playMusicState) //强制停止
-    {
-        // while (MTF_audio_pcm_output_busy(&wanted_spec));
-        MTF_audio_pcm_output_exit(&wanted_spec);
-        MUSIC_DEBUG("paly exit\r\n");
-        _timeTemp = 1;
-        play_exit = 1;
-        playMusicState = 0;
-        MUSIC_DEBUG("file close\r\n");
-        MTF_close(fpWav);
-    }
+    // if (play_exit && playMusicState) //强制停止
+    // {
+    //     // while (MTF_audio_pcm_output_busy(&wanted_spec));
+    //     MTF_audio_pcm_output_exit(&wanted_spec);
+    //     MUSIC_DEBUG("paly exit\r\n");
+    //     _timeTemp = 1;
+    //     play_exit = 1;
+    //     playMusicState = 0;
+    //     MUSIC_DEBUG("file close\r\n");
+    //     MTF_close(fpWav);
+    // }
 
     if (play_exit == 0)
     {
+        if (music_try_lock() != 0)
+            return;
         playMusicState = 1;                               //播放处理中
         if (MTF_audio_pcm_output_busy(&wanted_spec) == 0) //上一部分数据播放完
         {
@@ -453,8 +461,8 @@ void _WAV_Play2(void)
                 }
             }
         }
+        music_unlock();
     }
-    music_unlock();
 }
 
 /*****mp3解码******/
