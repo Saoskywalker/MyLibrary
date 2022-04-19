@@ -964,18 +964,18 @@ unsigned char gif_decode_loop(void)
 				}
 				else
 				{
-					return 0;
+					continue;
 				}
 			}
 			else if (state == 1) //暂停
 			{
-				return 0;
+				continue;
 			}
 			else if (*gifdecoding_loop) //循环解码一帧
 			{
 				*dtime = *dtime - 1;
 				if (*dtime)
-					return 0;
+					continue;
 				_run_decode = 1;
 			}
 			else //开始解码
@@ -987,7 +987,7 @@ unsigned char gif_decode_loop(void)
 				}
 				else
 				{
-					return 0;
+					continue;
 				}
 
 				MTF_seek(gfile, 0, SEEK_SET);
@@ -1057,7 +1057,7 @@ unsigned char gif_decode_loop(void)
 				res = 0X40; //gif停止
 				gif_decode_exit(id);
 			}
-			return res;
+			continue;
 		}
 	}
 	return 0;
