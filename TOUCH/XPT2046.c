@@ -3,7 +3,7 @@
 #include "delay.h"
 #include "touch.h"
 #include "stdio.h"
-#include "GPIO_port.h"
+#include "gpio_board.h"
 
 //命令
 #define CMD_RDX 0XD0
