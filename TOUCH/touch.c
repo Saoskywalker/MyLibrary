@@ -11,8 +11,7 @@
 #include "ts_calibrate.h"
 #include "touch_port.h"
 
-// #define touch_debug(...) printf(__VA_ARGS__)
-#define touch_debug(...)
+#define touch_debug(...) //printf(__VA_ARGS__)
 
 static u8 TP_Init(void);
 static uint8_t None_Scan(int *x, int *y, uint8_t target_num, uint8_t *result_num)
@@ -42,31 +41,27 @@ _m_tp_dev tp_dev =
 static u8 TP_Init(void)
 {
     tp_dev.touchtype |= (lcddev.dir & 0X03)<<1; //屏幕方向
+    tp_dev.touchtype |= 0X80; //默认为电容屏
     tp_dev.width = lcddev.width;
     tp_dev.height = lcddev.height;
 
-#if TOUCH_TYPE == 0
-    //////电阻屏////////
-    // XPT2046_Init(); //XPT2046触屏IC
-    // tp_dev.scan = TP_Scan;
-    touch_init(); //F1C100S自带电阻屏外设
-    tp_dev.scan = touch_scan;
+    if (touch_init() == 0)
+    {
+        tp_dev.scan = touch_scan;
 
-    if (TP_Get_Adjdata())
-    {
-        return 0; //已经校准
-    }
-    else //未校准
-    {
-        TP_Adjust(); //屏幕校准
-    }
-    return 1;
-#else
-    //////电容屏///////
-    tp_dev.touchtype |= 0X80; //电容屏
-    if (touch_init() == 0) // if (GT9147_Init() == 0)   //是GT9147
-    {
-        tp_dev.scan = touch_scan; // tp_dev.scan = GT9147_Scan; //扫描函数指向GT9147触摸屏扫描
+        if ((tp_dev.touchtype & 0X80) == 0) //如果初始化时设为电阻屏
+        {
+            if (TP_Get_Adjdata())
+            {
+                return 0; //已经校准
+            }
+            else //未校准
+            {
+                TP_Adjust(); //屏幕校准
+                return 1;
+            }
+        }
+
         return 0;
     }
     else
@@ -74,7 +69,6 @@ static u8 TP_Init(void)
         tp_dev.scan = None_Scan; //初始化失败
         return 2;
     }
-#endif
 }
 
 //////////////////////////////////////////////////////////////////////////////////
@@ -236,6 +230,7 @@ static float T_sqrt(float a)
 //触摸屏校准代码
 void TP_Adjust(void)
 {
+    u8 t_d = 0, t_already = 0;
     u16 pos_temp[4][2]; //坐标缓存值
     u8 cnt = 0;
     u16 d1, d2;
@@ -269,10 +264,13 @@ void TP_Adjust(void)
     while (1)                      //如果连续10秒钟没有按下,则自动退出
     {
         // tp_dev.scan(1);                          //扫描物理坐标
-        if ((tp_dev.sta & 0xc0) == TP_CATH_PRES) //按键按下了一次(此时按键松开了.)
+        t_d = tp_dev.sta;
+        if (t_d)
+            t_already = 1;
+        if (t_d == 0 && t_already == 1) //按键按下了一次(此时按键松开了.)
         {
             outtime = 0;
-            tp_dev.sta &= ~(1 << 6); //标记按键已经被处理过了.
+            t_already = 0; //标记按键已经被处理过了.
 
             pos_temp[cnt][0] = tp_dev.x[0];
             pos_temp[cnt][1] = tp_dev.y[0];
@@ -410,6 +408,9 @@ void TP_Adjust(void)
         if (outtime > 1000)
         {
             // TP_Get_Adjdata(); //取消, 超时照使用此次校准, 不保存
+            LCD_Clear(WHITE); //清屏
+            LCD_ShowString(35, 110, lcddev.width, lcddev.height, 16,
+                           (u8 *)"Touch Screen Adjust overtime, exited!");
             LCD_Display_Dir(DisDirTemp); //恢复配置
             tp_dev.touchtype = tp_dev.touchtype&(~0X06);
             tp_dev.touchtype |= (lcddev.dir & 0X03)<<1; //屏幕方向
@@ -479,6 +480,7 @@ u8 TP_Get_Adjdata(void)
 //触摸屏校准代码
 void TP_Adjust(void)
 {
+    u8 t_d = 0, t_already = 0;
     u8 cnt = 0;
     u16 outtime = 0;
     u8 DisDirTemp = 0;
@@ -513,15 +515,18 @@ void TP_Adjust(void)
     while (1)                      //如果连续10秒钟没有按下,则自动退出
     {
         // tp_dev.scan(1);                          //扫描物理坐标
-        if ((tp_dev.sta & 0xc0) == TP_CATH_PRES) //按键按下了一次(此时按键松开了.)
+        t_d = tp_dev.sta;
+        if (t_d)
+            t_already = 1;
+        if (t_d == 0 && t_already == 1) //按键按下了一次(此时按键松开了.)
         {
             outtime = 0;
-            tp_dev.sta &= ~(1 << 6); //标记按键已经被处理过了.
+            t_already = 0; //标记按键已经被处理过了.
             if (cnt <= 4)
             {
                 touch_cal.x[cnt] = tp_dev.x[0];
                 touch_cal.y[cnt] = tp_dev.y[0];
-                // touch_debug("cnt: %d, x: %d, y: %d\r\n", cnt, touch_cal.x[cnt], touch_cal.y[cnt]);
+                touch_debug("cnt: %d, x: %d, y: %d\r\n", cnt, touch_cal.x[cnt], touch_cal.y[cnt]);
             }
             cnt++;
             switch (cnt)
@@ -585,6 +590,7 @@ void TP_Adjust(void)
                         //X,Y轴调转
                         tp_dev.touchtype = (tp_dev.touchtype & 0XFE) + ((~tp_dev.touchtype) & 0x01);
                         cnt = 0;
+                        TPAjustFlag = 1; //获取物理坐标
                         LCD_ShowString(40, 145, 160, 20, 16, (u8 *)"x, y invert, do again");
                         LCD_Exec();
                         continue;
@@ -613,6 +619,9 @@ void TP_Adjust(void)
         if (outtime > 1000)
         {
             // TP_Get_Adjdata(); //取消, 超时照使用此次校准, 不保存
+            LCD_Clear(WHITE); //清屏
+            LCD_ShowString(35, 110, lcddev.width, lcddev.height, 16,
+                           (u8 *)"Touch Screen Adjust overtime, exited!");
             LCD_Display_Dir(DisDirTemp); //恢复配置
             tp_dev.touchtype = tp_dev.touchtype&(~0X06);
             tp_dev.touchtype |= (lcddev.dir & 0X03)<<1; //屏幕方向
@@ -640,7 +649,7 @@ void TP_Adjust_trigger(void)
         time_count = 0;
         count = 0;
     }
-    if (tp_dev.sta & TP_PRES_DOWN) //触摸屏被按下
+    if (tp_dev.sta) //触摸屏被按下
     {
         if(old_state)
         {
@@ -694,7 +703,7 @@ void rtp_test(void)
         break;
 #endif
         // tp_dev.scan(0); 		 
-		if(tp_dev.sta&TP_PRES_DOWN)			//触摸屏被按下
+		if(tp_dev.sta)			//触摸屏被按下
 		{	
 		 	if(tp_dev.x[0]<lcddev.width&&tp_dev.y[0]<lcddev.height)
 			{	

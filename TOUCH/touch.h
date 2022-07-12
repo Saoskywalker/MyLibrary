@@ -6,8 +6,6 @@
 
 #include "types_plus.h"          
 
-#define TP_PRES_DOWN 0x80  		//触屏被按下	  
-#define TP_CATH_PRES 0x40  		//有按键按下了 
 #define CT_MAX_TOUCH  5    		//电容屏支持的点数,固定为5点
 
 //触摸屏控制器
@@ -17,13 +15,8 @@ typedef struct
 	uint8_t (*scan)(int *x, int *y, uint8_t target_num, uint8_t *result_num); //获取触摸坐标, x, y: 坐标数组; target: 获取坐标数量; result: 获取结果数量 
 	void (*adjust)(void);		//触摸屏校准 
 	int x[CT_MAX_TOUCH]; 		//当前坐标
-	int y[CT_MAX_TOUCH];		//电容屏有最多5组坐标,电阻屏则用x[0],y[0]代表:此次扫描时,触屏的坐标,用
-								//x[4],y[4]存储第一次按下时的坐标. 
-	u8  sta;					//笔的状态 
-								//b7:按下1/松开0; 
-	                            //b6:0,没有按键按下;1,有按键按下. 
-								//b5:保留
-								//b4~b0:电容触摸屏按下的点数(0,表示未按下,1表示按下)
+	int y[CT_MAX_TOUCH];		//电容屏有最多5组坐标,电阻屏则用x[0],y[0]代表:此次扫描时,触屏的坐标
+	u8  sta;					//b7~b5:保留, b4~b0:电容触摸屏按下的点数(0,表示未按下,1表示按下)
 /////////////////////触摸屏校准参数(电容屏不需要校准)//////////////////////								
 	float xfac;					
 	float yfac;
