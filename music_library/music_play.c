@@ -4,7 +4,7 @@
 
 #define MUSIC_DEBUG(...) //printf(__VA_ARGS__)
 
-static int play_exit = 0; //播放退出标志
+static int play_exit = 1; //播放退出标志
 static unsigned char playMusicState = 0;
 static unsigned char wav_buff[2][70000] __attribute__((aligned(4)));
 struct wav_
