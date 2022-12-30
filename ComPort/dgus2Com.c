@@ -3,7 +3,7 @@
 #include "uart_port.h"
 #include "stdio.h"
 #include "mbcrc.h"
-#include "GPIO_port.h"
+#include "gpio_board.h"
 
 //IO定义为移植方便, 放于GPIO_port.h
 

@@ -1,7 +1,7 @@
 #include "T5UIC2_agreement.h"
 #include "Sagittarius_global.h"
 #include "uart_port.h"
-#include "GPIO_port.h"
+#include "gpio_board.h"
 #include "stdio.h"
 
 //fifo full pin

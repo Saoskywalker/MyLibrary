@@ -22,6 +22,28 @@ static struct wav_ wav;
 
 static audio_pcm_dev_type wanted_spec;
 
+//上锁, 避免多线程下冲突
+#include "system_port.h"
+static MTF_mutex *music_mutex = NULL;
+static char music_lock(void)
+{
+    if (music_mutex == NULL)
+    {
+        music_mutex = MTF_CreateMutex();
+    }
+    return (char)MTF_LockMutex(music_mutex);
+}
+
+static char music_try_lock(void)
+{
+    return (char)MTF_TryLockMutex(music_mutex);
+}
+
+static char music_unlock(void)
+{
+	return (char)MTF_UnlockMutex(music_mutex);
+}
+
 //输入路径
 int _WAV_Play(char *path)
 {
@@ -223,7 +245,8 @@ int wav_init(char *path, int play_time)
     int res = 0;
     int r = 0;
     uint8_t buff[8192];
-
+    
+    music_lock();
     if (playMusicState) //强制停止
     {
         // while (MTF_audio_pcm_output_busy(&wanted_spec));
@@ -235,6 +258,7 @@ int wav_init(char *path, int play_time)
         MUSIC_DEBUG("file close\r\n");
         MTF_close(fpWav);
     }
+    music_unlock();
 
     MUSIC_DEBUG("WAV play\r\n");
 
@@ -339,8 +363,8 @@ int wav_init(char *path, int play_time)
                 MUSIC_DEBUG("play...\r\n");
                 WavBuffInx = 0;
                 _unit = 0;
-                play_exit = 0; //开始播放
                 audio_keep_time = play_time;
+                play_exit = 0; //开始播放
             }
             else
                 MUSIC_DEBUG("parameter error\r\n");
@@ -353,20 +377,22 @@ int wav_init(char *path, int play_time)
 
 void _WAV_Play2(void)
 {
-    if (play_exit && playMusicState) //强制停止
-    {
-        // while (MTF_audio_pcm_output_busy(&wanted_spec));
-        MTF_audio_pcm_output_exit(&wanted_spec);
-        MUSIC_DEBUG("paly exit\r\n");
-        _timeTemp = 1;
-        play_exit = 1;
-        playMusicState = 0;
-        MUSIC_DEBUG("file close\r\n");
-        MTF_close(fpWav);
-    }
+    // if (play_exit && playMusicState) //强制停止
+    // {
+    //     // while (MTF_audio_pcm_output_busy(&wanted_spec));
+    //     MTF_audio_pcm_output_exit(&wanted_spec);
+    //     MUSIC_DEBUG("paly exit\r\n");
+    //     _timeTemp = 1;
+    //     play_exit = 1;
+    //     playMusicState = 0;
+    //     MUSIC_DEBUG("file close\r\n");
+    //     MTF_close(fpWav);
+    // }
 
     if (play_exit == 0)
     {
+        if (music_try_lock() != 0)
+            return;
         playMusicState = 1;                               //播放处理中
         if (MTF_audio_pcm_output_busy(&wanted_spec) == 0) //上一部分数据播放完
         {
@@ -409,6 +435,7 @@ void _WAV_Play2(void)
                     playMusicState = 0; //已停止播放处理
                     MUSIC_DEBUG("file close\r\n");
                     MTF_close(fpWav);
+                    music_unlock();
                     return;
                 }
             }
@@ -434,6 +461,7 @@ void _WAV_Play2(void)
                 }
             }
         }
+        music_unlock();
     }
 }
 

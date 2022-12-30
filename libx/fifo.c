@@ -8,19 +8,6 @@
 #include <math.h>
 #include "fifo.h"
 
-static uint8_t fifo_lock(struct fifo_t * f)
-{
-	while(f->lock);
-	f->lock = 1;
-	return 0;
-}
-
-static uint8_t fifo_unlock(struct fifo_t * f)
-{
-	f->lock = 0;
-	return 0;
-}
-
 static void __fifo_reset(struct fifo_t * f)
 {
 	f->in = 0;
@@ -83,7 +70,7 @@ struct fifo_t * fifo_alloc(unsigned int size)
 	f->in = 0;
 	f->out = 0;
 	// spin_lock_init(&f->lock);
-	f->lock = 0;
+	f->lock = MTF_CreateMutex();
 
 	return f;
 }
@@ -93,8 +80,9 @@ void fifo_free(struct fifo_t * f)
 {
 	if(f)
 	{
-		fifo_lock(f);
+		MTF_LockMutex(f->lock);
 		free(f->buffer);
+		MTF_DestroyMutex(f->lock);
 		free(f);
 	}
 }
@@ -105,10 +93,10 @@ void fifo_reset(struct fifo_t * f)
 	// irq_flags_t flags;
 
 	// spin_lock_irqsave(&f->lock, flags);
-	fifo_lock(f);
+	MTF_LockMutex(f->lock);
 	__fifo_reset(f);
 	// spin_unlock_irqrestore(&f->lock, flags);
-	fifo_unlock(f);
+	MTF_UnlockMutex(f->lock);
 }
 // EXPORT_SYMBOL(fifo_reset);
 
@@ -118,10 +106,10 @@ unsigned int fifo_len(struct fifo_t * f)
 	unsigned int ret;
 
 	// spin_lock_irqsave(&f->lock, flags);
-	fifo_lock(f);
+	MTF_LockMutex(f->lock);
 	ret = __fifo_len(f);
 	// spin_unlock_irqrestore(&f->lock, flags);
-	fifo_unlock(f);
+	MTF_UnlockMutex(f->lock);
 
 	return ret;
 }
@@ -133,10 +121,10 @@ unsigned int fifo_put(struct fifo_t * f, unsigned char * buf, unsigned int len)
 	unsigned int ret;
 
 	// spin_lock_irqsave(&f->lock, flags);
-	fifo_lock(f);
+	MTF_LockMutex(f->lock);
 	ret = __fifo_put(f, buf, len);
 	// spin_unlock_irqrestore(&f->lock, flags);
-	fifo_unlock(f);
+	MTF_UnlockMutex(f->lock);
 
 	return ret;
 }
@@ -147,12 +135,12 @@ unsigned int fifo_get(struct fifo_t * f, unsigned char * buf, unsigned int len)
 	unsigned int ret;
 
 	// spin_lock_irqsave(&f->lock, flags);
-	fifo_lock(f);
+	MTF_LockMutex(f->lock);
 	ret = __fifo_get(f, buf, len);
 	if(f->in == f->out)
 		f->in = f->out = 0;
 	// spin_unlock_irqrestore(&f->lock, flags);
-	fifo_unlock(f);
+	MTF_UnlockMutex(f->lock);
 
 	return ret;
 }

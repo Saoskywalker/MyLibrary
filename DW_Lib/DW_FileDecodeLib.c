@@ -17,7 +17,7 @@ static int DW_print_preallocated(char *name, cJSON *root)
     char *buf_fail = NULL;
     size_t len = 0;
     size_t len_fail = 0;
-    FILE *fp = NULL;
+    mFILE *fp = NULL;
     size_t total = 1;
 
     /* formatted print ×¢ÒâÊÍ·ÅoutÄÚ´æ*/

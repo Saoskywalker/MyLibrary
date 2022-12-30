@@ -635,11 +635,6 @@ u8 gif_decode(const u8 *filename, u16 x, u16 y, RectInfo *rect)
 			gifdecoding = 1;
 			while (gifdecoding && res == 0) //解码循环
 			{
-				if (system_process_weak() == 1) //SDL专用, 要定时获取事件, 不然无响应, 停机
-				{
-					break;
-				}
-
 				res = gif_drawimage(gfile, mygif89a, x, y); //显示一张图片
 				if (mygif89a->gifISD.flag & 0x80)
 					gif_recovergctbl(mygif89a); //恢复全局颜色表
@@ -964,18 +959,18 @@ unsigned char gif_decode_loop(void)
 				}
 				else
 				{
-					return 0;
+					continue;
 				}
 			}
 			else if (state == 1) //暂停
 			{
-				return 0;
+				continue;
 			}
 			else if (*gifdecoding_loop) //循环解码一帧
 			{
 				*dtime = *dtime - 1;
 				if (*dtime)
-					return 0;
+					continue;
 				_run_decode = 1;
 			}
 			else //开始解码
@@ -987,7 +982,7 @@ unsigned char gif_decode_loop(void)
 				}
 				else
 				{
-					return 0;
+					continue;
 				}
 
 				MTF_seek(gfile, 0, SEEK_SET);
@@ -1057,7 +1052,7 @@ unsigned char gif_decode_loop(void)
 				res = 0X40; //gif停止
 				gif_decode_exit(id);
 			}
-			return res;
+			continue;
 		}
 	}
 	return 0;

@@ -6,13 +6,14 @@ extern "C" {
 #endif
 
 // #include <spinlock.h>
+#include "system_port.h"
 
 struct fifo_t {
 	unsigned char * buffer;
 	unsigned int size;
 	unsigned int in;
 	unsigned int out;
-	unsigned int lock;
+	MTF_mutex *lock;
 	// spinlock_t lock;
 };
 
