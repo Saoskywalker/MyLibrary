@@ -10,4 +10,10 @@ void AUDIO_Demo(void);
 int wav_init(char *path, int play_time);
 void _WAV_Play2(void);
 
+int mp3_init(char *path, int play_time);
+void _mp3_Play2(void);
+
+int music_init(char *path, int play_time);
+void music_run(void);
+
 #endif

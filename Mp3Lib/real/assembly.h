@@ -56,17 +56,23 @@
 #ifndef _ASSEMBLY_H
 #define _ASSEMBLY_H
 
-#if (defined _WIN32 && !defined _WIN32_WCE) || (defined __WINS__ && defined _SYMBIAN) || defined(_OPENWAVE_SIMULATOR) || defined(WINCE_EMULATOR)    /* Symbian emulator for Ix86 */
+#if (defined _WIN32 && !defined _WIN32_WCE) || (defined __WINS__ && defined _SYMBIAN) || defined(_OPENWAVE_SIMULATOR) || defined(WINCE_EMULATOR) || defined(__EMSCRIPTEN__)    /* Symbian emulator for Ix86 */
 
 #pragma warning( disable : 4035 )	/* complains about inline asm not returning a value */
 
 static __inline int MULSHIFT32(int x, int y)	
 {
-    __asm {
+#if defined(__CC_ARM)
+   __asm {
 		mov		eax, x
 	    imul	y
 	    mov		eax, edx
 	}
+#else
+	long long temp;
+	temp =  (long long)x * (long long)y;
+	return temp >> 32;
+#endif	
 }
 
 static __inline int FASTABS(int x) 
@@ -104,11 +110,12 @@ static __inline int CLZ(int x)
 #ifdef __CW32__
 typedef long long Word64;
 #else
-typedef __int64 Word64;
+typedef long long Word64;
 #endif
 
 static __inline Word64 MADD64(Word64 sum, int x, int y)
 {
+#if defined(__CC_ARM)
 	unsigned int sumLo = ((unsigned int *)&sum)[0];
 	int sumHi = ((int *)&sum)[1];
 	__asm {
@@ -117,16 +124,20 @@ static __inline Word64 MADD64(Word64 sum, int x, int y)
 		add		eax, sumLo
 		adc		edx, sumHi
 	}
-
+#else
+	return sum + (Word64)x * (Word64)y;
+#endif
+ 
 	/* equivalent to return (sum + ((__int64)x * y)); */
 }
 
 static __inline Word64 SHL64(Word64 x, int n)
 {
+#if defined(__CC_ARM)
 	unsigned int xLo = ((unsigned int *)&x)[0];
 	int xHi = ((int *)&x)[1];
 	unsigned char nb = (unsigned char)n;
-
+ 
 	if (n < 32) {
 		__asm {
 			mov		edx, xHi
@@ -149,13 +160,17 @@ static __inline Word64 SHL64(Word64 x, int n)
 			xor		eax, eax
 		}
 	}
+#else
+	return x << n;
+#endif
 }
 
 static __inline Word64 SAR64(Word64 x, int n)
 {
+#if defined(__CC_ARM)
 	unsigned int xLo = ((unsigned int *)&x)[0];
 	int xHi = ((int *)&x)[1];
-	unsigned char nb = (unsigned char)n;
+	unsigned char nb = (unsigned char)n; 
 	if (n < 32) {
 		__asm {
 			mov		edx, xHi
@@ -180,6 +195,9 @@ static __inline Word64 SAR64(Word64 x, int n)
 			mov		edx, xHi
 		}
 	}
+#else
+	return x >> n;
+#endif
 }
 
 #elif (defined _WIN32) && (defined _WIN32_WCE)

@@ -467,13 +467,11 @@ void _WAV_Play2(void)
 
 /*****mp3解码******/
 //mp3
-#if defined(__CC_ARM)
 #define _MP3_LIB_H
-#endif
 
 #ifdef _MP3_LIB_H
 
-#include "mp3dec.h" //汇编文件没改为GCC版本,编不了
+#include "mp3dec.h"
 #include "mp3common.h"
 
 int Get_ID3V2(mFILE *f, char *TIT2, char *TPE1, char *TALB);
@@ -697,6 +695,274 @@ int _MP3_Play(char *path)
     MP3FreeDecoder(Mp3Decoder);
     MTF_close(f);
     return 0;
+}
+
+static int mp3Inx = 0;
+static int mp3TotalTime = 0; //播放时长
+static int mp3_pcm_data_size = 0;
+static mFILE *fpMp3 = NULL;
+static MP3FrameInfo mp3FrameInfo;
+static HMP3Decoder Mp3Decoder;
+
+int mp3_init(char *path, int play_time)
+{
+    int Frame_size = 0;
+    int offset = 0;
+    unsigned char *readPtr = 0; //输入数据缓冲
+    int Padding = 0;            //Padding位
+    int bytesLeft = 0;
+    int res = 0;
+
+    //TIT2：歌曲标题名字
+    //TPE1：作者名字
+    //TALB：作品专辑
+    char TIT2[100];
+    char TPE1[100];
+    char TALB[100];
+    int ID3v1 = 0, ID3v2 = 0; //ID3大小
+
+    music_lock();
+    if (playMusicState) //强制停止
+    {
+        // while (MTF_audio_pcm_output_busy(&wanted_spec));
+        MTF_audio_pcm_output_exit(&wanted_spec);
+        MUSIC_DEBUG("paly exit\r\n");
+        _timeTemp = 1;
+        play_exit = 1;
+        playMusicState = 0;
+        MUSIC_DEBUG("file close\r\n");
+        MTF_close(fpMp3);
+    }
+    music_unlock();
+
+    MUSIC_DEBUG("MP3 play\r\n");
+
+    if (path == NULL)
+    {
+        MUSIC_DEBUG("path is null..\r\n");
+        return -4;
+    }
+    fpMp3 = MTF_open(path, "rb");
+    if (fpMp3 == NULL)
+        res = 4;
+    else
+        res = 0;
+    if (res == 5)
+    {
+        MUSIC_DEBUG("path is null..\r\n");
+        return -3;
+    }
+    if (res == 4)
+    {
+        MUSIC_DEBUG("file not exist..\r\n");
+        return -3;
+    }
+    if (res == 0)
+        MUSIC_DEBUG("file open success..\r\n");
+    //
+    readPtr = wav_buff[0];
+    /*读入一段mp3文件*/
+    MTF_read(readPtr, 1, 10000, fpMp3);
+    bytesLeft = 10000;
+    //读ID3
+    ID3v1 = Get_ID3V1(fpMp3, TIT2, TPE1, TALB);
+    ID3v2 = Get_ID3V2(fpMp3, TIT2, TPE1, TALB);
+    //超出，从新读入数据
+    if (ID3v2 > 10000)
+    {
+        MUSIC_DEBUG("ID3v2 over long\r\n");
+        readPtr = wav_buff[0];
+        MTF_seek(fpMp3, ID3v2, SEEK_SET);
+        MTF_read(readPtr, 1, 10000, fpMp3);
+        bytesLeft = 10000;
+    }
+    else
+    {
+        if (ID3v2 > 0)
+            offset += ID3v2; //如果有ID3V2偏移到下一个帧
+        readPtr += offset;
+        bytesLeft -= offset;
+    }
+    /*【参数1：输入数据的缓存指针】【 参数2: 输入数据帧的剩余大小】*/
+    offset = MP3FindSyncWord(readPtr, bytesLeft); //找帧头
+    readPtr += offset;
+    bytesLeft -= offset;
+
+    if (offset < 0)
+    {
+        MUSIC_DEBUG("no frame head\r\n");
+        return -1;
+    }
+    else
+    {
+        Mp3Decoder = MP3InitDecoder();
+        if (Mp3Decoder == 0)
+        {
+            MUSIC_DEBUG("Init Mp3Decoder failed!\r\n");
+            return -1;
+        }
+        /*返回帧头信息*/
+        if (ERR_MP3_NONE == MP3GetNextFrameInfo(Mp3Decoder, &mp3FrameInfo, readPtr))
+        {
+            /*打印帧头信息*/
+            MUSIC_DEBUG("FrameInfo bitrate=%d \r\n", mp3FrameInfo.bitrate);
+            MUSIC_DEBUG("FrameInfo nChans=%d \r\n", mp3FrameInfo.nChans);
+            MUSIC_DEBUG("FrameInfo samprate=%d \r\n", mp3FrameInfo.samprate);
+            MUSIC_DEBUG("FrameInfo bitsPerSample=%d \r\n", mp3FrameInfo.bitsPerSample);
+            MUSIC_DEBUG("FrameInfo outputSamps=%d \r\n", mp3FrameInfo.outputSamps);
+            MUSIC_DEBUG("FrameInfo layer=%d \r\n", mp3FrameInfo.layer);
+            MUSIC_DEBUG("FrameInfo version=%d \r\n", mp3FrameInfo.version);
+            /*计算数据帧大小 帧大小 = ( 每帧采样次数 × 比特率(bit/s) ÷ 8 ÷采样率) + Padding*/
+            Frame_size = (int)samplesPerFrameTab[mp3FrameInfo.version][mp3FrameInfo.layer - 1] * mp3FrameInfo.bitrate / 8 / mp3FrameInfo.samprate + Padding;
+            MUSIC_DEBUG("FrameInfo Frame_size=%d \r\n", Frame_size);
+            //返回播放时长信息
+            int t = Get_mp3_play_time_ms(ID3v2, ID3v1, fpMp3, mp3FrameInfo);
+            mp3TotalTime = t / 1000;
+            MUSIC_DEBUG("play time=%02d:%02d:%02d \r\n", mp3TotalTime / 3600, mp3TotalTime % 3600 / 60, mp3TotalTime % 3600 % 60);
+        }
+    }
+    /*只能播放MP3文件*/
+    if ((mp3FrameInfo.layer < 3) || (mp3FrameInfo.bitrate <= 0) || (mp3FrameInfo.samprate <= 0))
+    {
+        MUSIC_DEBUG("format is not MP3... \r\n");
+        MP3FreeDecoder(Mp3Decoder);
+        MTF_close(fpMp3);
+        return -1;
+    }
+
+    /*初始化参数*/
+    wav.audio_format = 1;
+    wav.num_channels = mp3FrameInfo.nChans;
+    wav.bits_per_sample = mp3FrameInfo.bitsPerSample;
+    wav.sample_rate = mp3FrameInfo.samprate;
+
+    /*写入参数*/
+    if (wav.audio_format == 1) //PCM格式
+    {
+        wanted_spec.silence = 0;
+        wanted_spec.samples = Frame_size / wav.num_channels;
+        wanted_spec.freq = wav.sample_rate;
+        wanted_spec.channels = wav.num_channels;
+        if (wav.bits_per_sample == 16)
+            wanted_spec.format = AUDIO_S16SYS;
+        else if (wav.bits_per_sample == 24)
+            wanted_spec.format = AUDIO_S24SYS;
+        else if (wav.bits_per_sample == 32)
+            wanted_spec.format = AUDIO_S32SYS;
+        else
+            return -6;
+
+        if (MTF_audio_pcm_output_init(&wanted_spec, NULL) == 0) //音频硬件初始化
+        {
+            //dma初始化-需要先解码两个缓存-播放一个，一个备用
+            mp3_pcm_data_size = MP3_to_PCM_DATA(Mp3Decoder, &mp3FrameInfo, fpMp3, wav_buff[0], 1, ID3v2); //读取一部分MP3数据并转为PCM格式, 与wav不同的地方
+            if (mp3_pcm_data_size > 0)
+            {
+                MTF_audio_pcm_output(&wanted_spec, wav_buff[0], mp3_pcm_data_size); //输出数据
+                MUSIC_DEBUG("play...\r\n");
+            }
+            else
+            {
+                MUSIC_DEBUG("decode error D1...\r\n");
+                MTF_audio_pcm_output_exit(&wanted_spec);
+                MP3FreeDecoder(Mp3Decoder);
+                MTF_close(fpMp3);
+                return -2;
+            }
+
+            mp3_pcm_data_size = MP3_to_PCM_DATA(Mp3Decoder, &mp3FrameInfo, fpMp3, wav_buff[1], 0, 0);
+            audio_keep_time = play_time;
+            play_exit = 0; //开始播放            
+            return 0;
+        }
+        else
+        {
+            MUSIC_DEBUG("para error\r\n");
+        }
+    }
+    else
+    {
+        MUSIC_DEBUG("format error\r\n");
+    }
+    MP3FreeDecoder(Mp3Decoder);
+    MTF_close(fpMp3);
+    return -7;
+}
+
+void _mp3_Play2(void)
+{
+    // if (play_exit && playMusicState) //强制停止
+    // {
+    //     // while (MTF_audio_pcm_output_busy(&wanted_spec));
+    //     MTF_audio_pcm_output_exit(&wanted_spec);
+    //     MUSIC_DEBUG("paly exit\r\n");
+    //     _timeTemp = 1;
+    //     play_exit = 1;
+    //     playMusicState = 0;
+    //     MUSIC_DEBUG("file close\r\n");
+    //     MTF_close(fpMp3);
+    // }
+
+    if (play_exit == 0)
+    {
+        if (music_try_lock() != 0)
+            return;
+        playMusicState = 1;                               //播放处理中
+            
+        //检测发送完成中断-中断DMA指向下一缓存，读SD后解码一个缓存
+        if (MTF_audio_pcm_output_busy(&wanted_spec) == 0) //上一部分数据播放完
+        {
+            /*设置DMA一下缓存*/
+            mp3Inx++;
+            if (mp3_pcm_data_size > 0)
+            {
+                int x = mp3Inx % 2;
+                MTF_audio_pcm_output(&wanted_spec, wav_buff[x], mp3_pcm_data_size);
+                /*解一下缓存*/
+                //int times=Read_time_ms();
+                if (x == 0)
+                    mp3_pcm_data_size = MP3_to_PCM_DATA(Mp3Decoder, &mp3FrameInfo, fpMp3, wav_buff[1], 0, 0);
+                if (x == 1)
+                    mp3_pcm_data_size = MP3_to_PCM_DATA(Mp3Decoder, &mp3FrameInfo, fpMp3, wav_buff[0], 0, 0);
+            }
+            else
+            {
+                MTF_audio_pcm_output_exit(&wanted_spec);
+                MUSIC_DEBUG("play end\r\n");
+                _timeTemp = 1;
+                play_exit = 1;      //停止播放
+                playMusicState = 0; //已停止播放处理
+                MUSIC_DEBUG("file close\r\n");
+                MTF_close(fpMp3);
+                music_unlock();
+                return;
+            }
+
+            int t = MTF_audio_output_time_get() / 100;
+            if (t != _timeTemp) //播放持续时间, 单位1s
+            {
+                _timeTemp = t;
+                MUSIC_DEBUG("%02d:%02d:%02d----%02d:%02d:%02d \r\n",
+                       mp3TotalTime / 3600, mp3TotalTime % 3600 / 60,
+                       mp3TotalTime % 3600 % 60, t / 3600, t % 3600 / 60, t % 3600 % 60);
+                if (audio_keep_time != 0XFF) //0XFF为播放整个文件
+                {
+                    if (t >= audio_keep_time) //停止播放
+                    {
+                        MTF_audio_pcm_output_exit(&wanted_spec);
+                        MUSIC_DEBUG("paly exit\r\n");
+                        _timeTemp = 1;
+                        play_exit = 1;
+                        playMusicState = 0;
+                        MUSIC_DEBUG("file close\r\n");
+                        MTF_close(fpMp3);
+                    }
+                }
+            }            
+        }
+
+        music_unlock();
+    }
 }
 
 // /*
@@ -963,6 +1229,72 @@ void MP3WAVplay(char *path)
 void MP3WAVplay_exit(void)
 {
     play_exit = 1;
+}
+
+static uint8_t _music_format_flag = 0; //当前音乐格式, 0为无
+int music_init(char *path, int play_time)
+{
+    int res = 4;
+    char temp_path[64] = {0};
+
+#ifdef _MP3_LIB_H
+    if (res == 4)
+    {
+        strcpy(temp_path, path);
+        strcat(temp_path, ".mp3");
+        fpMp3 = MTF_open(temp_path, "rb");
+        if (fpMp3 == NULL)
+        {
+            res = 4;
+        }
+        else
+        {
+            res = 0;
+            _music_format_flag = 1;
+            MTF_close(fpMp3);
+            mp3_init(temp_path, play_time);
+        }
+    }
+#endif    
+
+    if (res == 4)
+    {
+        strcpy(temp_path, path);
+        strcat(temp_path, ".wav");
+        fpWav = MTF_open(temp_path, "rb");
+        if (fpWav == NULL)
+        {
+            res = 4;
+        }
+        else
+        {
+            res = 0;
+            _music_format_flag = 2;
+            MTF_close(fpWav);
+            wav_init(temp_path, play_time);
+        }
+    }
+
+    return res;
+}
+
+void music_run(void)
+{
+    if (_music_format_flag == 1)
+    {
+#ifdef _MP3_LIB_H        
+        _mp3_Play2();
+#endif        
+    }
+    else if (_music_format_flag == 2)
+    {
+        _WAV_Play2();
+    }
+    
+    if (play_exit == 1 && playMusicState == 0)
+    {
+        _music_format_flag = 0;
+    }
 }
 
 /*音频测试*/
