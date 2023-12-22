@@ -6,7 +6,7 @@
 
 static int play_exit = 1; //播放退出标志
 static unsigned char playMusicState = 0;
-static unsigned char wav_buff[2][70000] __attribute__((aligned(4)));
+static unsigned char wav_buff[2][131072] __attribute__((aligned(4)));
 struct wav_
 {
     uint16_t audio_format;       //格式
@@ -611,7 +611,7 @@ int _MP3_Play(char *path)
     if (wav.audio_format == 1) //PCM格式
     {
         wanted_spec.silence = 0;
-        wanted_spec.samples = 1024;
+        wanted_spec.samples = mp3FrameInfo.outputSamps / mp3FrameInfo.nChans;
         wanted_spec.freq = wav.sample_rate;
         wanted_spec.channels = wav.num_channels;
         if (wav.bits_per_sample == 16)
@@ -840,7 +840,7 @@ int mp3_init(char *path, int play_time)
     if (wav.audio_format == 1) //PCM格式
     {
         wanted_spec.silence = 0;
-        wanted_spec.samples = Frame_size / wav.num_channels;
+        wanted_spec.samples = mp3FrameInfo.outputSamps / mp3FrameInfo.nChans;
         wanted_spec.freq = wav.sample_rate;
         wanted_spec.channels = wav.num_channels;
         if (wav.bits_per_sample == 16)
@@ -869,7 +869,7 @@ int mp3_init(char *path, int play_time)
                 MTF_close(fpMp3);
                 return -2;
             }
-
+            mp3Inx = 0;
             mp3_pcm_data_size = MP3_to_PCM_DATA(Mp3Decoder, &mp3FrameInfo, fpMp3, wav_buff[1], 0, 0);
             audio_keep_time = play_time;
             play_exit = 0; //开始播放            
@@ -979,9 +979,9 @@ void _mp3_Play2(void)
 // 返回-1 播放完成
 // */
 #define DATSIZE (512 * 30)
-#define FM 5 //连续解码FM帧
+#define FM 8 //连续解码FM帧
 unsigned char rbuff[DATSIZE] __attribute__((aligned(4)));
-unsigned char rbuff2[DATSIZE] __attribute__((aligned(4)));
+// unsigned char rbuff2[DATSIZE] __attribute__((aligned(4)));
 int MP3_to_PCM_DATA(HMP3Decoder Mp3Decoder, MP3FrameInfo *mp3FrameInfo, mFILE *f, unsigned char *outbuff, int data_init, int read_addr)
 {
     int offset;
