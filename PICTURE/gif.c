@@ -868,8 +868,8 @@ typedef struct
 	gifDecodeTemp *temp;
 }gifDecodeDevice;
 
-#define GIF_MAX_CNT 8 //最大同时播放gif数量
-static gifDecodeDevice *gif_decode_table[GIF_MAX_CNT] = {NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL}; //保存gif播放变量
+#define GIF_MAX_CNT 9 //最大同时播放gif数量, ps最后一个为用于阻塞式GIF运行
+static gifDecodeDevice *gif_decode_table[GIF_MAX_CNT] = {NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL}; //保存gif播放变量
 static gifDecodeDevice *gif_decode_id_create(int id)
 {
 	gifDecodeDevice *gif_device = (gifDecodeDevice *)pic_memalloc(sizeof(gifDecodeDevice));
@@ -887,6 +887,92 @@ static gifDecodeDevice *gif_decode_id_create(int id)
 		pic_memfree(gif_device);
 		pic_memfree(gif_temp);
 		return NULL;
+	}
+}
+
+//检查是否使用阻塞式GIF控制
+unsigned char gif_block_check(void)
+{
+	if (gif_decode_table[GIF_MAX_CNT-1] == NULL) //最后一个为用于阻塞式GIF运行
+	{
+		return 0; //已停止
+	}
+	else
+	{
+		return 1; //在运行
+	}
+}
+
+static u8 gif_decode3_callNum = 0; //结束时回调方式
+static void _gif_decode3_callBack(void)
+{
+	if (gif_decode3_callNum==1)
+	{
+		UI_LCDBackupRenew();
+	}
+	else if (gif_decode3_callNum==2)
+	{
+		// UI_FillFrontToDest(&pic, ((u16)data[3]<<8)+data[4], ((u16)data[5]<<8)+data[6]);
+	}
+	gif_decode3_callNum = 0;
+}
+u8 gif_decode3(const u8 *filename, u16 x, u16 y, RectInfo *rect, u8 callNum)
+{
+	gifDecodeDevice *gif_D;
+	gifDecodeTemp *gif_temp;
+	int id = GIF_MAX_CNT - 1, res = -4;
+	u16 width = 0, height = 0;
+	gif89a *mygif89a;
+
+	mygif89a = &tgif89a;
+	mygif89a->lzw = &tlzw;
+	gif_D = gif_decode_id_create(id);
+	if(gif_D!=NULL)
+	{
+		gif_temp = gif_D->temp;
+		gif_temp->mygif89a = &gif_temp->gif89astruct;
+		gif_temp->mygif89a->lzw = &gif_temp->LZWstruct;
+		gif_temp->dtime = 0;			//解码延时
+		gif_temp->gifdecoding_loop = 0; //标记解码运行中
+		gif_temp->gfile = MTF_open((const char *)filename, "rb");
+		if (gif_temp->gfile == NULL)
+		{
+			if (gif_check_head(gif_temp->gfile))
+				res = PIC_FORMAT_ERR;
+			if (gif_getinfo(gif_temp->gfile, mygif89a))
+				res = PIC_FORMAT_ERR;
+
+			width = mygif89a->gifLSD.width;
+			height = mygif89a->gifLSD.height;
+			x = (width - mygif89a->gifLSD.width) / 2 + x;
+			y = (height - mygif89a->gifLSD.height) / 2 + y;
+			if(rect!=NULL)
+			{
+				rect->width = width;
+				rect->height = height;
+				rect->totalPixels = width*height;
+			}			
+			pic_memfree(gif_D);
+			pic_memfree(gif_temp);
+			gif_decode_table[id] = NULL;
+			res = -4;
+		}
+		res = gif_D->id;
+	}
+	else
+	{
+		res = -1;
+	}
+
+	if (res >= -1)
+	{
+		gif_decode3_callNum = callNum;
+		gif_decode_set(GIF_MAX_CNT - 1, 2, 1, x, y);
+		return 0;
+	}
+	else
+	{
+		return -2;
 	}
 }
 
@@ -928,6 +1014,8 @@ unsigned char gif_decode_loop(void)
 
 	for (id = 0; id < GIF_MAX_CNT; id++)
 	{
+		if (gif_decode_table[GIF_MAX_CNT-1] != NULL && id != (GIF_MAX_CNT-1))
+			continue;
 		if (gif_decode_table[id] == NULL)
 		{
 			continue;
@@ -1051,6 +1139,10 @@ unsigned char gif_decode_loop(void)
 			{
 				res = 0X40; //gif停止
 				gif_decode_exit(id);
+				if (id == GIF_MAX_CNT - 1)
+				{
+					_gif_decode3_callBack();
+				}
 			}
 			continue;
 		}
@@ -1098,7 +1190,7 @@ void gif_decode_set(int id, char state, unsigned char loop_cnt, int x, int y)
 
 	if (gif_decode_table[id] == NULL)
 		return;
-
+		
 	gif_D->loop_cnt = loop_cnt;
 	gif_D->state = state;
 	gif_D->x = x;
