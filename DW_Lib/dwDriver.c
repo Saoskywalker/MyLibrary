@@ -1,3 +1,16 @@
+/*
+Copyright (c) 2019-2023 Aysi 773917760@qq.com. All right reserved
+Official site: www.mtf123.club
+
+This software is provided 'as-is', without any express or implied
+warranty. In no event will the authors be held liable for any damages
+arising from the use of this software.
+
+It under the terms of the Apache as published;
+either version 2 of the License,
+or (at your option) any later version.
+*/
+
 /**********************************************
  * name: command application v1.0
  * email:support@mtf123.club
@@ -31,7 +44,7 @@ static u8 *_data = NULL;
 char dwMount(void)
 {
 	_data_cnt = 0;
-	_data = malloc(BUF_MAX); //»º´æ×î´ó256×Ö½Ú
+	_data = malloc(BUF_MAX); //ç¼“å­˜æœ€å¤§256å­—èŠ‚
 	if (_data == NULL)
 		return 1;
 	else
@@ -50,19 +63,19 @@ void dwGetSendData(u8 **i, unsigned int **j)
 	*j = &_data_cnt;
 }
 
-/*******·¢ËÍÖ¡Í·*********/
+/*******å‘é€å¸§å¤´*********/
 static __INLINE void dwSendStart(void)
 {
 	_data_cnt = 0;
 }
 
-/*******·¢ËÍÖ¡Î²*********/
+/*******å‘é€å¸§å°¾*********/
 static __INLINE void dwSendOver(void)
 {
 	// MTF_Com_sendTail();
 }
 
-/***·¢ËÍÖ¡ÓÃ»§Êı¾İ***/
+/***å‘é€å¸§ç”¨æˆ·æ•°æ®***/
 static __INLINE void dwSendBuf(u8 byte)
 {
 	if (_data_cnt < BUF_MAX)
@@ -78,7 +91,7 @@ void dwCancelKey(void){
 	keyNum = 0;
 }
 
-//****************×ø±êÄ£Ê½*****************
+//****************åæ ‡æ¨¡å¼*****************
 void dwListenCoord(void(*press)(void), void(*free)(void), const Button* btn){
 	if(keyNum < 30){
 		dwKeyListen[keyNum].pressHandle = press;
@@ -88,7 +101,7 @@ void dwListenCoord(void(*press)(void), void(*free)(void), const Button* btn){
 	}
 }
 
-/**½«×ø±êÊı¾İ×ª»»³Éint ĞÍ**/
+/**å°†åæ ‡æ•°æ®è½¬æ¢æˆint å‹**/
 /* static void dwConvertLocation(void){
 	locaX = 0;
 	locaX = frameData[1];
@@ -118,15 +131,15 @@ void dwHandlerCoord(void){
 
 	if (keyFlag)
 	{
-		// ËÉÊÖ´¦Àí
+		// æ¾æ‰‹å¤„ç†
 		if (dwQueryCmd() == DW_CMD_RELEASE)
 			{
 				keyFlag = 0;
-				//		if((i < keyNum)&&(i==dwGetKey())){ // ÓĞĞ§°´¼ü
+				//		if((i < keyNum)&&(i==dwGetKey())){ // æœ‰æ•ˆæŒ‰é”®
 				if ((i < keyNum))
-				{ // ÓĞĞ§°´¼ü
+				{ // æœ‰æ•ˆæŒ‰é”®
 					if (dwKeyListen[i].freeHandle != 0)
-					{ // ²»Îª¿Õ
+					{ // ä¸ä¸ºç©º
 						dwKeyListen[i].freeHandle();
 					}
 				}
@@ -134,15 +147,15 @@ void dwHandlerCoord(void){
 	}
 	else
 	{
-		// °´ÏÂ´¦Àí
+		// æŒ‰ä¸‹å¤„ç†
 		if (dwQueryCmd() == DW_CMD_PRESSED)
 		{
 			keyFlag = 1;
 			i = dwGetKey();
 			if (i < keyNum)
-			{ // ÓĞĞ§°´¼ü
+			{ // æœ‰æ•ˆæŒ‰é”®
 				if (dwKeyListen[i].pressHandle != 0)
-				{ // ²»Îª¿Õ
+				{ // ä¸ä¸ºç©º
 					dwKeyListen[i].pressHandle();
 				}
 			}
@@ -150,7 +163,7 @@ void dwHandlerCoord(void){
 	}
 } */
 
-//***************´¥¿ØÄ£Ê½***********************
+//***************è§¦æ§æ¨¡å¼***********************
 /* void dwListenButton(void(*press)(void), void(*free)(void), u16 Command){
 	if(keyNum < 30){
 		dwKeyListen[keyNum].pressHandle = press;
@@ -166,15 +179,15 @@ void dwHandlerCoord(void){
 
 	if (keyFlag)
 	{
-		// ËÉÊÖ´¦Àí
+		// æ¾æ‰‹å¤„ç†
 		if (dwQueryCmd() == DW_KEY_RELEASE)
 		{
 			keyFlag = 0;
-			//		if((i < keyNum)&&(i==dwGetKey())){ // ÓĞĞ§°´¼ü
+			//		if((i < keyNum)&&(i==dwGetKey())){ // æœ‰æ•ˆæŒ‰é”®
 			if ((i < keyNum))
-			{ // ÓĞĞ§°´¼ü
+			{ // æœ‰æ•ˆæŒ‰é”®
 				if (dwKeyListen[i].freeHandle != 0)
-				{ // ²»Îª¿Õ
+				{ // ä¸ä¸ºç©º
 					dwKeyListen[i].freeHandle();
 				}
 			}
@@ -182,7 +195,7 @@ void dwHandlerCoord(void){
 	}
 	else
 	{
-		// °´ÏÂ´¦Àí
+		// æŒ‰ä¸‹å¤„ç†
 		if (dwQueryCmd() == DW_KEY_PRESSED)
 		{
 			keyFlag = 1;
@@ -193,9 +206,9 @@ void dwHandlerCoord(void){
 					break;
 			}
 			if (i < keyNum)
-			{ // ÓĞĞ§°´¼ü
+			{ // æœ‰æ•ˆæŒ‰é”®
 				if (dwKeyListen[i].pressHandle != 0)
-				{ // ²»Îª¿Õ
+				{ // ä¸ä¸ºç©º
 					dwKeyListen[i].pressHandle();
 				}
 			}
@@ -203,7 +216,7 @@ void dwHandlerCoord(void){
 	}
 } */
 
-// ÉèÖÃµ÷É«°å
+// è®¾ç½®è°ƒè‰²æ¿
 void dwSetColor(u16 f,u16 b){
 	fColor = f;
 	bcolor = b;
@@ -216,7 +229,7 @@ void dwSetColor(u16 f,u16 b){
 	dwSendOver();
 }
 
-/***È¡Ö¸¶¨Î»ÖÃ×÷Îª±³¾°É«***/
+/***å–æŒ‡å®šä½ç½®ä½œä¸ºèƒŒæ™¯è‰²***/
 void dwSetBackColor(u16 x,u16 y){
 	dwSendStart();
 	dwSendBuf(0x42);
@@ -227,7 +240,7 @@ void dwSetBackColor(u16 x,u16 y){
 	dwSendOver();
 }
 
-/***È¡Ö¸¶¨Î»ÖÃ×÷ÎªÇ°¾°É«***/
+/***å–æŒ‡å®šä½ç½®ä½œä¸ºå‰æ™¯è‰²***/
 void dwSetForeColor(u16 x,u16 y){
 	dwSendStart();
 	dwSendBuf(0x43);
@@ -238,22 +251,22 @@ void dwSetForeColor(u16 x,u16 y){
 	dwSendOver();
 }
 
-/*****È«ÆÁÏÔÊ¾Ö¸¶¨Î»ÖÃÍ¼Æ¬²»Çø·ÖÓïÑÔ*****/
-//para: Num ÎªÎ»ÖÃË÷ÒıºÅ
+/*****å…¨å±æ˜¾ç¤ºæŒ‡å®šä½ç½®å›¾ç‰‡ä¸åŒºåˆ†è¯­è¨€*****/
+//para: Num ä¸ºä½ç½®ç´¢å¼•å·
 void dwDisPicNoL(u8 picNum){
 	dwSendStart();
-	dwSendBuf(0x70); //ÏÔÊ¾Í¼Æ¬ÃüÁî
+	dwSendBuf(0x70); //æ˜¾ç¤ºå›¾ç‰‡å‘½ä»¤
 	dwSendBuf(picNum);
 	dwSendOver();
 }
 
-/*****È«ÆÁÏÔÊ¾Ö¸¶¨Î»ÖÃÍ¼Æ¬Çø·ÖÓïÑÔ*****/
-//para: Num ÎªÎ»ÖÃË÷ÒıºÅ
+/*****å…¨å±æ˜¾ç¤ºæŒ‡å®šä½ç½®å›¾ç‰‡åŒºåˆ†è¯­è¨€*****/
+//para: Num ä¸ºä½ç½®ç´¢å¼•å·
 void dwDisPicWithL(u8 picNum){
 	dwDisPicNoL(picNum + language);
 }
 
-// L = 1Çø·ÖÓïÑÔ£¬l= 0 ²»Çø·ÖÓïÑÔ
+// L = 1åŒºåˆ†è¯­è¨€ï¼Œl= 0 ä¸åŒºåˆ†è¯­è¨€
 void dwDisButton(const Button* button,u8 l,u16 x,u16 y){
 	if(l){
 		dwCutPicL(button->picNum,button->xs,button->ys,button->xe,button->ye,x,y);
@@ -262,7 +275,7 @@ void dwDisButton(const Button* button,u8 l,u16 x,u16 y){
 	}
 }
 
-// L = 1Çø·ÖÓïÑÔ£¬l= 0 ²»Çø·ÖÓïÑÔ
+// L = 1åŒºåˆ†è¯­è¨€ï¼Œl= 0 ä¸åŒºåˆ†è¯­è¨€
 void dwDisImage(const Image* image,u8 l,u16 x,u16 y){
 	if(l){
 		dwCutPicL(image->picNum,image->xs,image->ys,image->xe,image->ye,x,y);
@@ -271,11 +284,11 @@ void dwDisImage(const Image* image,u8 l,u16 x,u16 y){
 	}
 }
 
-/****¼ôÇĞÍ¼Æ¬ÏÔÊ¾µ½Ö¸¶¨Î»ÖÃ²»Çø·ÖÓïÑÔ****/
+/****å‰ªåˆ‡å›¾ç‰‡æ˜¾ç¤ºåˆ°æŒ‡å®šä½ç½®ä¸åŒºåˆ†è¯­è¨€****/
 void dwCutPic(u8 picNum,u16 xs,u16 ys,u16 xe,u16 ye,u16 x,u16 y){
 	dwSendStart();
 
-	dwSendBuf(0x71);//¼ôÇĞÍ¼Æ¬ÃüÁî
+	dwSendBuf(0x71);//å‰ªåˆ‡å›¾ç‰‡å‘½ä»¤
 	dwSendBuf(picNum);
 	
 	dwSendBuf((u8)(xs>>8));
@@ -296,12 +309,12 @@ void dwCutPic(u8 picNum,u16 xs,u16 ys,u16 xe,u16 ye,u16 x,u16 y){
 	dwSendOver();
 }
 
-/****¼ôÇĞÍ¼Æ¬ÏÔÊ¾µ½Ö¸¶¨Î»ÖÃÇø·ÖÓïÑÔ****/
+/****å‰ªåˆ‡å›¾ç‰‡æ˜¾ç¤ºåˆ°æŒ‡å®šä½ç½®åŒºåˆ†è¯­è¨€****/
 void dwCutPicL(u8 picNum,u16 xs,u16 ys,u16 xe,u16 ye,u16 x,u16 y){
 	dwCutPic(picNum+language,xs,ys,xe,ye,x,y);
 }
 
-/*****Ö¸Ê¾´óĞ¡Ö¸¶¨Î»ÖÃÏÔÊ¾Ò»¸ö×Ö·û*****/
+/*****æŒ‡ç¤ºå¤§å°æŒ‡å®šä½ç½®æ˜¾ç¤ºä¸€ä¸ªå­—ç¬¦*****/
 //prama: size=8 8*8; 16 16*16; 24 24*24; 32 32*32
 void dwDisChar(TextSize size, u16 x, u16 y, u8 c){
 	u8 temp[2]= {0,0};
@@ -309,7 +322,7 @@ void dwDisChar(TextSize size, u16 x, u16 y, u8 c){
 	dwDisString(size,x,y,temp);
 }
 
-/*****Ö¸Ê¾´óĞ¡Ö¸¶¨Î»ÖÃÏÔÊ¾Ò»¸öÊı×Ö*****/
+/*****æŒ‡ç¤ºå¤§å°æŒ‡å®šä½ç½®æ˜¾ç¤ºä¸€ä¸ªæ•°å­—*****/
 //prama: size=8 8*8; 16 16*16; 24 24*24; 32 32*32
 void dwDisNum(TextSize size, u16 x, u16 y, u8 c){
 	if(c < 10){
@@ -319,7 +332,7 @@ void dwDisNum(TextSize size, u16 x, u16 y, u8 c){
 	}	
 }
 
-/*****Ö¸Ê¾´óĞ¡Ö¸¶¨Î»ÖÃÏÔÊ¾ÎÄ×Ö*****/
+/*****æŒ‡ç¤ºå¤§å°æŒ‡å®šä½ç½®æ˜¾ç¤ºæ–‡å­—*****/
 //prama: size=8 8*8; 16 16*16; 24 24*24; 32 32*32
 void dwDisString(TextSize size, u16 x, u16 y, u8 string[]){
 	u8 i = 0;
@@ -364,21 +377,21 @@ void dwDisString(TextSize size, u16 x, u16 y, u8 string[]){
 	dwSendOver();
 }
 
-/****** ÅäÖÃÆÁÄ»¹¤×÷Ä£Ê½ ******/
+/****** é…ç½®å±å¹•å·¥ä½œæ¨¡å¼ ******/
 void dwSetMode(void){
 	dwSendStart();
 	dwSendBuf(0xE0);
 	dwSendBuf(0x55);
 	dwSendBuf(0x5A);
 	dwSendBuf(0xA5);
-	dwSendBuf(0x00);  // ÏÔÊ¾Ä£Ê½
-	dwSendBuf(0x07);  // ²¨ÌØÂÊ115200
-	dwSendBuf(0x48);  // ´¥¿ØÄ£Ê½ Ö»ÉÏ´«Ò»´Î0x73
-	dwSendBuf(0xEF);  // ÎÄ±¾ÏÔÊ¾Ä£Ê½ÂË³ı±³¾°
+	dwSendBuf(0x00);  // æ˜¾ç¤ºæ¨¡å¼
+	dwSendBuf(0x07);  // æ³¢ç‰¹ç‡115200
+	dwSendBuf(0x48);  // è§¦æ§æ¨¡å¼ åªä¸Šä¼ ä¸€æ¬¡0x73
+	dwSendBuf(0xEF);  // æ–‡æœ¬æ˜¾ç¤ºæ¨¡å¼æ»¤é™¤èƒŒæ™¯
 	dwSendOver();
 }
 
-/**** ÆÁÄ»×Ô´ø·äÃùÆ÷ÏìÒ»Éù *******/
+/**** å±å¹•è‡ªå¸¦èœ‚é¸£å™¨å“ä¸€å£° *******/
 void dwSound(u8 duration){  // duration*10ms
 	dwSendStart();
 	dwSendBuf(0x79);
@@ -386,25 +399,25 @@ void dwSound(u8 duration){  // duration*10ms
 	dwSendOver();
 }
 
- /*****µÈ´ıËÉÊÖ*****/
+ /*****ç­‰å¾…æ¾æ‰‹*****/
 /* void dwWaitRelease(void){
 	while(frameData[0] != 0x72 && frameData[0] != 0x78);
 } */
 
- /*****µÈ´ı°´ÏÂ*****/
+ /*****ç­‰å¾…æŒ‰ä¸‹*****/
 /* void dwWaitPress(void){
 	while(frameData[0] != 0x73 && frameData[0] != 0x79);
 } */
 
-/***²éÑ¯°´¼ü×´Ì¬****/
-// DW_CMD_PRESSED= 0x73  °´ÏÂ
-// DW_CMD_RELEASE= 0x72  ËÉÊÖ
-// DW_CMD_DONE   = 0xE4  ´¥¿ØĞ£ÕıÍê³É
+/***æŸ¥è¯¢æŒ‰é”®çŠ¶æ€****/
+// DW_CMD_PRESSED= 0x73  æŒ‰ä¸‹
+// DW_CMD_RELEASE= 0x72  æ¾æ‰‹
+// DW_CMD_DONE   = 0xE4  è§¦æ§æ ¡æ­£å®Œæˆ
 
-/****²éÑ¯½ÓÊÕµÄÃüÁî***/
+/****æŸ¥è¯¢æ¥æ”¶çš„å‘½ä»¤***/
 // u8 dwQueryCmd(void)
 // {
-// 	if(frameFlag) //ÊÇ·ñÓĞÊı¾İÖ¡
+// 	if(frameFlag) //æ˜¯å¦æœ‰æ•°æ®å¸§
 // 	{
 // 		frameFlag = 0;
 // 		return frameData[0];
@@ -415,7 +428,7 @@ void dwSound(u8 duration){  // duration*10ms
 // 	}
 // }
 
-/****´¥ÆÁĞ£×¼***/
+/****è§¦å±æ ¡å‡†***/
 /* void dwCalibration(void){ 
 	dwSendStart();
 	dwSendBuf(0xE4); 
@@ -423,24 +436,24 @@ void dwSound(u8 duration){  // duration*10ms
 	dwSendBuf(0x5A);
 	dwSendBuf(0xA5);
 	dwSendOver();
-	while(dwQueryCmd() != 0xE4);  // µÈ´ıÊÕµ½Ğ£×¼³É¹¦Ö¸Áî
+	while(dwQueryCmd() != 0xE4);  // ç­‰å¾…æ”¶åˆ°æ ¡å‡†æˆåŠŸæŒ‡ä»¤
 } */
 
-// ×î´óÒôÁ¿²¥·ÅÒôÀÖ
+// æœ€å¤§éŸ³é‡æ’­æ”¾éŸ³ä¹
 // param id:  0--120;
 // param num: 1--120;
 // extern u8 muteFlag;
 void dwPlayMusic(u8 id, u8 num){
-	// if(muteFlag) return; //¾²Òô
+	// if(muteFlag) return; //é™éŸ³
 	dwSendStart();
 	dwSendBuf(0x30);
 	dwSendBuf(id);
 	dwSendBuf(num);
-	dwSendBuf(0xA0); 	//ÒôÁ¿0x00~0xff
+	dwSendBuf(0xA0); 	//éŸ³é‡0x00~0xff
 	dwSendOver();
 }
 
-// Í£Ö¹ÒôÀÖ
+// åœæ­¢éŸ³ä¹
 void dwStopMusic(void){
 	dwSendStart();
 	dwSendBuf(0x30);
@@ -450,7 +463,7 @@ void dwStopMusic(void){
 	dwSendOver();
 }
 
-//µ÷½ÚÒôÁ¿
+//è°ƒèŠ‚éŸ³é‡
 void dwPlayVol(u8 i){
 	dwSendStart();
 	dwSendBuf(0x32);
@@ -458,10 +471,10 @@ void dwPlayVol(u8 i){
 	dwSendOver();
 }
 
-//AVÊäÈë
-//i: 0¹Ø±Õ, 1¿ªÆô
-//contrast(0~255): ¶Ô±È¶È(Ä¬ÈÏ128), bright(0~255): ÁÁ¶È(Ä¬ÈÏ32) 
-//saturation(0~255): ±¥ºÍ¶È(Ä¬ÈÏ128), hue(0~255): É«µ÷(Ä¬ÈÏ0) 
+//AVè¾“å…¥
+//i: 0å…³é—­, 1å¼€å¯
+//contrast(0~255): å¯¹æ¯”åº¦(é»˜è®¤128), bright(0~255): äº®åº¦(é»˜è®¤32) 
+//saturation(0~255): é¥±å’Œåº¦(é»˜è®¤128), hue(0~255): è‰²è°ƒ(é»˜è®¤0) 
 void AVinput(u8 i, u8 contrast, u8 bright, u8 saturation, u8 hue)
 {
 	dwSendStart();

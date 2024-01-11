@@ -1,3 +1,16 @@
+/*
+Copyright (c) 2019-2023 Aysi 773917760@qq.com. All right reserved
+Official site: www.mtf123.club
+
+This software is provided 'as-is', without any express or implied
+warranty. In no event will the authors be held liable for any damages
+arising from the use of this software.
+
+It under the terms of the Apache as published;
+either version 2 of the License,
+or (at your option) any later version.
+*/
+
 #ifndef __DWDRIVER_H
 #define __DWDRIVER_H
 
@@ -9,13 +22,13 @@
 #define DW_COL_WHITE	0xFFFF
 #define DW_COL_BLACK	0x0000
 
-#define DW_KEY_PRESSED	0x79   // ´¥¿Ø°´ÏÂ
-#define DW_KEY_RELEASE	0x78   // ´¥¿ØËÉÊÖ
-#define DW_CMD_PRESSED	0x73   // °´ÏÂ
-#define DW_CMD_RELEASE	0x72   // ËÉÊÖ
-#define DW_CMD_DONE     0xE4   // Ğ£ÕıÍê³É
+#define DW_KEY_PRESSED	0x79   // è§¦æ§æŒ‰ä¸‹
+#define DW_KEY_RELEASE	0x78   // è§¦æ§æ¾æ‰‹
+#define DW_CMD_PRESSED	0x73   // æŒ‰ä¸‹
+#define DW_CMD_RELEASE	0x72   // æ¾æ‰‹
+#define DW_CMD_DONE     0xE4   // æ ¡æ­£å®Œæˆ
 
-#define DW_KEY_NONE     0xFF   // ÎŞ°´¼ü
+#define DW_KEY_NONE     0xFF   // æ— æŒ‰é”®
 
 typedef enum TextSize{
 	DW_SIZE_8,
@@ -62,88 +75,88 @@ void AVinput(u8 i, u8 contrast, u8 bright, u8 saturation, u8 hue);
 // param lang: LANGUAGE_CHINESE or LANGUAGE_ENGLISH
 void dwSetLanguage(u8 lang);
 
-// ÉèÖÃµ÷É«°å
+// è®¾ç½®è°ƒè‰²æ¿
 void dwSetColor(u16 f,u16 b);
 
 
-/***È¡Ö¸¶¨Î»ÖÃ×÷Îª±³¾°É«***/
+/***å–æŒ‡å®šä½ç½®ä½œä¸ºèƒŒæ™¯è‰²***/
 void dwSetBackColor(u16 x,u16 y);
 
-/***È¡Ö¸¶¨Î»ÖÃ×÷ÎªÇ°¾°É«***/
+/***å–æŒ‡å®šä½ç½®ä½œä¸ºå‰æ™¯è‰²***/
 void dwSetForeColor(u16 x,u16 y);
 
-// L = 1Çø·ÖÓïÑÔ£¬l= 0 ²»Çø·ÖÓïÑÔ
+// L = 1åŒºåˆ†è¯­è¨€ï¼Œl= 0 ä¸åŒºåˆ†è¯­è¨€
 void dwDisButton(const Button* button,u8 l,u16 x,u16 y);
 
-// L = 1Çø·ÖÓïÑÔ£¬l= 0 ²»Çø·ÖÓïÑÔ
+// L = 1åŒºåˆ†è¯­è¨€ï¼Œl= 0 ä¸åŒºåˆ†è¯­è¨€
 void dwDisImage(const Image* image,u8 l,u16 x,u16 y);
 
 
-/*****È«ÆÁÏÔÊ¾Ö¸¶¨Î»ÖÃÍ¼Æ¬²»Çø·ÖÓïÑÔ*****/
-//para: Num ÎªÎ»ÖÃË÷ÒıºÅ
+/*****å…¨å±æ˜¾ç¤ºæŒ‡å®šä½ç½®å›¾ç‰‡ä¸åŒºåˆ†è¯­è¨€*****/
+//para: Num ä¸ºä½ç½®ç´¢å¼•å·
 void dwDisPicNoL(u8 picNum);
 
-/*****È«ÆÁÏÔÊ¾Ö¸¶¨Î»ÖÃÍ¼Æ¬Çø·ÖÓïÑÔ*****/
-//para: Num ÎªÎ»ÖÃË÷ÒıºÅ
+/*****å…¨å±æ˜¾ç¤ºæŒ‡å®šä½ç½®å›¾ç‰‡åŒºåˆ†è¯­è¨€*****/
+//para: Num ä¸ºä½ç½®ç´¢å¼•å·
 void dwDisPicWithL(u8 picNum);
 
-/**** ÆÁÄ»×Ô´ø·äÃùÆ÷ÏìÒ»Éù *******/
+/**** å±å¹•è‡ªå¸¦èœ‚é¸£å™¨å“ä¸€å£° *******/
 void dwSound(u8 duration);  // duration*10ms
 
 
-/****´¥ÆÁĞ£×¼***/
+/****è§¦å±æ ¡å‡†***/
 void dwCalibration(void);
 
 
-/******ÅäÖÃÆÁÄ»¹¤×÷Ä£Ê½******/
+/******é…ç½®å±å¹•å·¥ä½œæ¨¡å¼******/
 void dwSetMode(void);
 
-/****¼ôÇĞÍ¼Æ¬ÏÔÊ¾µ½Ö¸¶¨Î»ÖÃÇø·ÖÓïÑÔ****/
+/****å‰ªåˆ‡å›¾ç‰‡æ˜¾ç¤ºåˆ°æŒ‡å®šä½ç½®åŒºåˆ†è¯­è¨€****/
 void dwCutPic(u8 picNum,u16 xs,u16 ys,u16 xe,u16 ye,u16 x,u16 y);
 
- /****¼ôÇĞÍ¼Æ¬ÏÔÊ¾µ½Ö¸¶¨Î»ÖÃ²»Çø·ÖÓïÑÔ****/
+ /****å‰ªåˆ‡å›¾ç‰‡æ˜¾ç¤ºåˆ°æŒ‡å®šä½ç½®ä¸åŒºåˆ†è¯­è¨€****/
 void dwCutPicL(u8 picNum,u16 xs,u16 ys,u16 xe,u16 ye,u16 x,u16 y);
 
 
- /*****Ö¸Ê¾´óĞ¡Ö¸¶¨Î»ÖÃÏÔÊ¾Ò»¸ö×Ö·û*****/
+ /*****æŒ‡ç¤ºå¤§å°æŒ‡å®šä½ç½®æ˜¾ç¤ºä¸€ä¸ªå­—ç¬¦*****/
  //prama: size=8 8*8; 16 16*16; 24 24*24; 32 32*32
  void dwDisChar(TextSize size, u16 x, u16 y, u8 c);
 
 
- /*****Ö¸Ê¾´óĞ¡Ö¸¶¨Î»ÖÃÏÔÊ¾Ò»¸öÊı×Ö*****/
+ /*****æŒ‡ç¤ºå¤§å°æŒ‡å®šä½ç½®æ˜¾ç¤ºä¸€ä¸ªæ•°å­—*****/
  //prama: size=8 8*8; 16 16*16; 24 24*24; 32 32*32
  void dwDisNum(TextSize size, u16 x, u16 y, u8 c);
 
 
- /*****Ö¸Ê¾´óĞ¡Ö¸¶¨Î»ÖÃÏÔÊ¾ÎÄ×Ö*****/
+ /*****æŒ‡ç¤ºå¤§å°æŒ‡å®šä½ç½®æ˜¾ç¤ºæ–‡å­—*****/
  //prama: size=8 8*8; 16 16*16; 24 24*24; 32 32*32
  void dwDisString(TextSize size, u16 x, u16 y, u8 string[]);
 
 
- /*****µÈ´ıËÉÊÖ*****/
+ /*****ç­‰å¾…æ¾æ‰‹*****/
 void dwWaitRelease(void);
 
- /*****µÈ´ı°´ÏÂ*****/
+ /*****ç­‰å¾…æŒ‰ä¸‹*****/
 void dwWaitPress(void);
 
- /***²éÑ¯°´¼ü×´Ì¬****/
- // 0x73  °´ÏÂ
- // 0x72  ËÉÊÖ
- // 0xE4  ´¥¿ØĞ£ÕıÍê³É
+ /***æŸ¥è¯¢æŒ‰é”®çŠ¶æ€****/
+ // 0x73  æŒ‰ä¸‹
+ // 0x72  æ¾æ‰‹
+ // 0xE4  è§¦æ§æ ¡æ­£å®Œæˆ
  u8 dwQueryCmd(void);
 
 void dwCancelKey(void);
 
-//²¥·ÅÒôÀÖ
+//æ’­æ”¾éŸ³ä¹
 void dwPlayMusic(u8 id, u8 num);
 
-// Í£Ö¹ÒôÀÖ
+// åœæ­¢éŸ³ä¹
 void dwStopMusic(void);
 
-//µ÷½ÚÒôÁ¿
+//è°ƒèŠ‚éŸ³é‡
 void dwPlayVol(u8 i);
 
-//»ñÈ¡·¢ËÍÊı¾İ»º´æµØÖ·, ºÍÊı¾İ³¤¶ÈµØÖ·
+//è·å–å‘é€æ•°æ®ç¼“å­˜åœ°å€, å’Œæ•°æ®é•¿åº¦åœ°å€
 void dwGetSendData(u8 **i, unsigned int **j);
 
 char dwMount(void);
